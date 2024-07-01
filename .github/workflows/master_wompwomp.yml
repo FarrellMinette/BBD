@@ -6,7 +6,7 @@ name: Build and deploy Node.js app to Azure Web App - wompwomp
 on:
   push:
     branches:
-      - master
+      - Gyro
   workflow_dispatch:
 
 jobs:

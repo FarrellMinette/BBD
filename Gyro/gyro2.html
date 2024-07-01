@@ -65,16 +65,8 @@
         requestAnimationFrame(gameLoop);
       }
 
-      DeviceOrientationEvent.requestPermission()
-        .then((response) => {
-          if (response == "granted") {
-            window.addEventListener("deviceorientation", handleOrientation);
-            gameLoop();
-          }
-        })
-        .catch(console.error);
-
       window.addEventListener("deviceorientation", handleOrientation);
+
       gameLoop();
     </script>
   </body>

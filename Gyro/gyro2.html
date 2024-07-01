@@ -73,6 +73,9 @@
           }
         })
         .catch(console.error);
+
+      window.addEventListener("deviceorientation", handleOrientation);
+      gameLoop();
     </script>
   </body>
 </html>

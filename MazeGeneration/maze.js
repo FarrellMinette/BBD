@@ -3,8 +3,9 @@ let c = canvas.getContext("2d");
 let current;
 
 class Maze {
-  constructor(size, rows, columns) {
-    this.size = size;
+  constructor(width, height, rows, columns) {
+    this.width = width;
+    this.height = height;
     this.rows = rows;
     this.cols = columns;
     this.grid = [];
@@ -15,7 +16,15 @@ class Maze {
     for (let r = 0; r < this.rows; r++) {
       let row = [];
       for (let c = 0; c < this.cols; c++) {
-        let cell = new Cell(this.size, this.grid, this.rows, this.cols, r, c);
+        let cell = new Cell(
+          this.width,
+          this.height,
+          this.grid,
+          this.rows,
+          this.cols,
+          r,
+          c
+        );
         row.push(cell);
       }
       this.grid.push(row);
@@ -42,8 +51,8 @@ class Maze {
   }
 
   draw() {
-    canvas.width = this.size;
-    canvas.height = this.size;
+    canvas.width = this.width;
+    canvas.height = this.height;
     canvas.style.background = "black";
 
     this.grid.forEach((row) => {
@@ -55,14 +64,24 @@ class Maze {
 }
 
 class Cell {
-  constructor(parentSize, parentGrid, rows, cols, rowNum, colNum) {
-    this.parentSize = parentSize;
+  constructor(
+    parentWidth,
+    parentHeight,
+    parentGrid,
+    rows,
+    cols,
+    rowNum,
+    colNum
+  ) {
+    this.parentWidth = parentWidth;
+    this.parentHeight = parentHeight;
     this.parentGrid = parentGrid;
     this.rows = rows;
     this.cols = cols;
     this.rowNum = rowNum;
     this.colNum = colNum;
-    this.size = parentSize / rows;
+    this.width = parentWidth / cols;
+    this.height = parentHeight / rows;
     this.walls = {
       topWall: true,
       bottomWall: true,
@@ -131,31 +150,31 @@ class Cell {
     let toX = 0;
     let toY = 0;
     if (this.walls.topWall) {
-      fromX = this.colNum * this.size;
-      fromY = this.rowNum * this.size;
-      toX = fromX + this.size;
+      fromX = this.colNum * this.width;
+      fromY = this.rowNum * this.height;
+      toX = fromX + this.width;
       toY = fromY;
       this.drawLine(fromX, fromY, toX, toY);
     }
     if (this.walls.bottomWall) {
-      fromX = this.colNum * this.size;
-      fromY = this.rowNum * this.size + this.size;
-      toX = fromX + this.size;
+      fromX = this.colNum * this.width;
+      fromY = this.rowNum * this.height + this.height;
+      toX = fromX + this.width;
       toY = fromY;
       this.drawLine(fromX, fromY, toX, toY);
     }
     if (this.walls.leftWall) {
-      fromX = this.colNum * this.size;
-      fromY = this.rowNum * this.size;
+      fromX = this.colNum * this.width;
+      fromY = this.rowNum * this.height;
       toX = fromX;
-      toY = fromY + this.size;
+      toY = fromY + this.height;
       this.drawLine(fromX, fromY, toX, toY);
     }
     if (this.walls.rightWall) {
-      fromX = this.colNum * this.size + this.size;
-      fromY = this.rowNum * this.size;
+      fromX = this.colNum * this.width + this.width;
+      fromY = this.rowNum * this.height;
       toX = fromX;
-      toY = fromY + this.size;
+      toY = fromY + this.height;
       this.drawLine(fromX, fromY, toX, toY);
     }
   }
@@ -164,15 +183,25 @@ class Cell {
     this.drawWalls();
     c.fillStyle = this.visited ? "black" : "white";
     c.fillRect(
-      this.colNum * this.size + 1,
-      this.rowNum * this.size + 1,
-      this.size - 2,
-      this.size - 2
+      this.colNum * this.width + 1,
+      this.rowNum * this.height + 1,
+      this.width - 2,
+      this.height - 2
     );
   }
 }
 
-let maze = new Maze(500, 10, 10);
+// Set dimensions to fit a mobile phone screen (16:9 ratio)
+let screenWidth = window.innerWidth;
+let screenHeight = window.innerHeight;
+let mazeWidth = screenWidth;
+let mazeHeight = (screenWidth * 9) / 16;
+
+// Set number of rows and columns
+let rows = 18; // This can be adjusted based on desired cell size
+let cols = 32; // This can be adjusted based on desired cell size
+
+let maze = new Maze(mazeWidth, mazeHeight, rows, cols);
 maze.setup();
 maze.generateMaze();
 maze.draw();

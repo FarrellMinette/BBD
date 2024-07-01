@@ -23,6 +23,24 @@ class Maze {
     current = this.grid[0][0];
   }
 
+  generateMaze() {
+    current.visited = true;
+
+    while (true) {
+      let next = current.getRandNeighbour();
+      if (next) {
+        next.visited = true;
+        this.stack.push(current);
+        current.removeWalls(current, next);
+        current = next;
+      } else if (this.stack.length > 0) {
+        current = this.stack.pop();
+      } else {
+        break;
+      }
+    }
+  }
+
   draw() {
     canvas.width = this.size;
     canvas.height = this.size;
@@ -30,37 +48,9 @@ class Maze {
 
     this.grid.forEach((row) => {
       row.forEach((cell) => {
-        cell.show(); // This method will draw otu the walls of the cell
+        cell.show();
       });
     });
-
-    this.DFSMaze(); // We will implement this in a minute
-
-    requestAnimationFrame(() => {
-      this.draw();
-    });
-  }
-
-  DFSMaze() {
-    current.visited = true;
-    let next = current.getRandNeighbour(); // We'll also define this in a minute
-    if (next) {
-      next.visited = true;
-      this.stack.push(current);
-      current.color = "green";
-      current.highlight();
-      current.removeWalls(current, next);
-      current = next;
-    } else if (this.stack.length > 0) {
-      current.color = "black";
-      let cell = this.stack.pop();
-      current.highlight();
-      current = cell;
-    }
-
-    if (this.stack.length == 0) {
-      return;
-    }
   }
 }
 
@@ -81,7 +71,6 @@ class Cell {
     };
     this.visited = false;
     this.neighbours = [];
-    this.color = "black";
   }
 
   setNeighbours() {
@@ -116,6 +105,7 @@ class Cell {
     c.lineTo(toX, toY);
     c.stroke();
   }
+
   removeWalls(cell1, cell2) {
     let XDiff = cell2.colNum - cell1.colNum;
     if (XDiff == 1) {
@@ -134,6 +124,7 @@ class Cell {
       cell1.walls.topWall = false;
     }
   }
+
   drawWalls() {
     let fromX = 0;
     let fromY = 0;
@@ -169,18 +160,9 @@ class Cell {
     }
   }
 
-  highlight() {
-    c.fillStyle = "red";
-    c.fillRect(
-      this.colNum * this.size + 1,
-      this.rowNum * this.size + 1,
-      this.size - 2,
-      this.size - 2
-    );
-  }
   show() {
     this.drawWalls();
-    c.fillStyle = this.color;
+    c.fillStyle = this.visited ? "black" : "white";
     c.fillRect(
       this.colNum * this.size + 1,
       this.rowNum * this.size + 1,
@@ -190,7 +172,7 @@ class Cell {
   }
 }
 
-let maze = new Maze(500, 20, 20);
+let maze = new Maze(500, 10, 10);
 maze.setup();
+maze.generateMaze();
 maze.draw();
-console.log(maze.grid);

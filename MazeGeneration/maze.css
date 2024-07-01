@@ -1,8 +1,14 @@
-body {
-  background: #121212;
+body,
+html {
+  margin: 0;
+  padding: 0;
+  height: 100%;
   display: flex;
-  align-items: center;
   justify-content: center;
-  height: 100vh;
-  overflow: hidden;
+  align-items: center;
+  background-color: #f0f0f0;
+}
+
+canvas {
+  border: 1px solid #000;
 }

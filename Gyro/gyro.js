@@ -1,3 +1,16 @@
+if (typeof DeviceMotionEvent.requestPermission === 'function') {
+  DeviceOrientationEvent.requestPermission()
+  .then(response => {
+    if (response == 'granted') {
+      window.addEventListener('deviceorientation', (e) => {
+        // do something with e
+      })
+    }
+  })
+  .catch(console.error)
+}
+
+
 function loadDataWithBaseUrl() {
   const a = document.getElementById("a");
   const b = document.getElementById("b");

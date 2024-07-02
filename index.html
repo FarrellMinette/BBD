@@ -10,55 +10,19 @@
         padding: 0;
         height: 100%;
         display: flex;
-        justify-content: left;
+        justify-content: center;
         align-items: center;
         background-color: #f0f0f0;
       }
 
-      #myCanvas {
+      canvas {
         border: 1px solid #000;
-        width: 75vw;
-        height: 90vh;
-        flex: 8;
-      }
-
-      #infoContainer {
-        flex-direction: column;
-        display: flex;
-        align-items: center;
-        justify-content: end;
-        width: 15vw;
-        height: 90vh;
-        flex: 1;
-      }
-
-      #playerInfo {
-        flex: 3;
-      }
-
-      #gyroContainer {
-        padding: 10px 10px 10px 10px;
-        flex: 1;
-        display: flex;
-
-      }
-
-      #gyro {
-        position: relative;
-        border: 1px solid #000;
-        border-radius: 100%;
-        width: 15vh;
-        height: 15vh;
-      }
-
-      #buffer {
-        height: 20vh;
       }
 
       #ball {
         position: absolute;
-        top: 15px;
-        left: 15px;
+        top: 400;
+        left: 450;
         width: 15px;
         height: 15px;
         background: rgb(0, 55, 128);
@@ -68,30 +32,8 @@
     </style>
   </head>
   <body>
-    <canvas id="myCanvas"></canvas>
-    <div id="infoContainer">
-      <div id="playerInfo">
-        <h3>Players</h3>
-        <div class="player" id="player1">
-          <p>Player1</p>
-        </div>
-        <div class="player" id="player2">
-          <p>Player2</p>
-        </div>
-        <div class="player" id="player3">
-          <p>Player3</p>
-        </div>
-        <div class="player" id="player4">
-          <p>Player4</p>
-        </div>
-      </div>
-      <div id="buffer">
-      </div>
-      <div id="gyroContainer">
-        <canvas id="gyro"></canvas>
-      </div>
-    </div>
+    <canvas id="myCanvas" width="480" height="320"></canvas>
+    <div id="ball"></div>
     <script src="maze_runner.js" type="module" defer></script>
-    <script src="gyro2.js" defer></script>
   </body>
 </html>

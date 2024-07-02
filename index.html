@@ -10,21 +10,61 @@
         padding: 0;
         height: 100%;
         display: flex;
-        justify-content: center;
+        justify-content: left;
+        flex-direction: column;
         align-items: center;
         background-color: #f0f0f0;
       }
 
-      canvas {
+      #myCanvas {
         border: 1px solid #000;
+        /* width: 100vw; */
+        height: 70vh;
+        aspect-ratio: 1/1;
+      }
+
+      #infoContainer {
+        flex-direction: row;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        /* width: 90vw; */
+        aspect-ratio: 3/1;
+        height: 20vh;
+        padding: 2vw;
+      }
+
+      #playerInfo {
+        display: flex;
+        flex-direction: column;
+        align-items: start;
+        flex: 1;
+      }
+
+      #gyroContainer {
+        padding: 10px 10px 10px 10px;
+        display: flex;
+        flex:1;
+      }
+
+      #gyro {
+        position: relative;
+        border: 1px solid #000;
+        border-radius: 100%;
+        width: 15vh;
+        height: 15vh;
+      }
+
+      #buffer {
+        flex: 3;
       }
 
       #ball {
         position: absolute;
-        top: 15px;
-        left: 15px;
-        width: 15px;
-        height: 15px;
+        top: 5px;
+        left: 475px;
+        width: 10px;
+        height: 10px;
         background: rgb(0, 55, 128);
         border-radius: 100%;
       }
@@ -32,8 +72,34 @@
     </style>
   </head>
   <body>
-    <canvas id="myCanvas" width="480" height="320"></canvas>
-    <div id="ball"></div>
+    <canvas id="myCanvas"></canvas>
+    <div id="infoContainer">
+      <div id="playerInfo">
+        <h3 id="playerInfoHeader">Players</h3>
+        <div class="player" id="player1">
+          Player1
+        </div>
+        <div class="player" id="player2">
+          Player2
+        </div>
+        <div class="player" id="player3">
+          Player3
+        </div>
+        <div class="player" id="player4">
+          Player4
+        </div>
+      </div>
+      <div id="buffer">
+        <div id="ballXCoordinate"></div>
+        <div id="ballYCoordinate"></div>
+        <div id="gyroRadius"></div>
+      </div>
+      <div id="gyroContainer">
+        <canvas id="gyro"></canvas>
+      </div>
+    </div>
     <script src="maze_runner.js" type="module" defer></script>
+    <script src="gyro2.js" defer></script>
+    <div id="ball"></div> 
   </body>
 </html>

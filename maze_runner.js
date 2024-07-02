@@ -83,10 +83,10 @@ class Cell {
       this.width = parentWidth / cols;
       this.height = parentHeight / rows;
       this.walls = {
-      topWall: true,
-      bottomWall: true,
-      leftWall: true,
-      rightWall: true,
+        topWall: true,
+        bottomWall: true,
+        leftWall: true,
+        rightWall: true,
       };
       this.visited = false;
       this.neighbours = [];
@@ -117,7 +117,7 @@ class Cell {
   }
 
   drawLine(fromX, fromY, toX, toY) {
-      ctx.lineWidth = 7.5;
+      ctx.lineWidth = 10;
       ctx.strokeStyle = "white";
       ctx.beginPath();
       ctx.moveTo(fromX, fromY);
@@ -200,7 +200,7 @@ class Ball {
     this.ay = ay;
     this.x = ballElement.offsetLeft
     this.y = ballElement.offsetTop
-    this.ballRadius = 20
+    this.ballRadius = 2
   }
 
   update() {
@@ -208,7 +208,7 @@ class Ball {
     this.ballElement.style.top = this.y + "px";
 
     if (rightPressed==true || leftPressed==true || upPressed==true || downPressed == true) {
-      let num = 15
+      let num = 5
       let colors = ctx.getImageData(this.x, this.y, num, num).data
       let col_sum = 0 
       for (let i=0; i<num**2; i++) {
@@ -256,6 +256,8 @@ function draw() {
     maze.draw();
     ball.update();
   }
+
+function draw_nothing() {}
   
 function keyDownHandler(event) {
   if (event.key === "Right" || event.key === "ArrowRight") {
@@ -284,12 +286,12 @@ function keyUpHandler(event) {
 // Set dimensions to fit a mobile phone screen (16:9 ratio)
 let screenWidth = window.innerWidth;
 let screenHeight = window.innerHeight;
-let mazeWidth = screenWidth-5;
-let mazeHeight = screenHeight-5;
+let mazeWidth = screenWidth*0.8;
+let mazeHeight = screenHeight*0.8;
 
 // Set number of rows and columns
-let rows = 16; // This can be adjusted based on desired cell size
-let cols = 32; // This can be adjusted based on desired cell size
+let rows = 10; // This can be adjusted based on desired cell size
+let cols = 10; // This can be adjusted based on desired cell size
 
 let maze = new Maze(mazeWidth, mazeHeight, rows, cols);
 maze.setup();

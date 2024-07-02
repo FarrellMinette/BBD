@@ -192,67 +192,70 @@ class Cell {
 }
   
 class Ball {
-  constructor(x, y, dx, dy) {
-    this.x = x;
-    this.y = y;
+  constructor(ballElement, dx, dy) {
+    this.ballElement = ballElement
     this.dx = dx;
     this.dy = dy;
-  }
-
-  draw() {
-    ctx.beginPath();
-    ctx.arc(this.x, this.y, ballRadius, 0, Math.PI * 2);
-    ctx.fillStyle = "#0095DD";
-    ctx.fill();
-    ctx.closePath();
+    this.x = ballElement.style.left
+    this.y = ballElement.style.top
+    // this.x = this.ballElement.style.left
+    // this.y = this.ballElement.style.top
   }
 
   update() {
-    let row = Math.floor(this.y/this.dy)
-    let col = Math.floor(this.x/this.dx)
 
-    if ((rightPressed==true) && (maze.grid[row][col].walls.rightWall==false)) this.x = this.x + this.dx
-    else if (leftPressed==true && (maze.grid[row][col].walls.leftWall==false)) this.x = this.x - this.dx
-    else if (upPressed==true && (maze.grid[row][col].walls.topWall==false)) this.y = this.y - this.dy
-    else if (downPressed==true && (maze.grid[row][col].walls.bottomWall==false)) this.y = this.y + this.dy
+    // this.ballElement.scroll({top: 100,
+    //   left: 100,
+    //   behavior: "smooth",});
+    this.x = 100;
+    this.y = 100;
 
-    if (this.x + this.dx > canvas.width - ballRadius)  this.x = canvas.width - ballRadius;
-    else if (this.x + this.dx < ballRadius) this.x = ballRadius;
+    console.log(this.x, this.y)
 
-    if (this.y + this.dy > canvas.height - ballRadius) this.y = canvas.height - ballRadius;
-    else if (this.y + this.dy < ballRadius) this.y = ballRadius;
+    // this.ballElement.style.left = this.x;
+    // this.ballElement.style.top = this.y;
+
+    // if ((rightPressed==true)) this.x = this.x + this.dx
+    // else if (leftPressed==true) this.x = this.x - this.dx
+    // else if (upPressed==true) this.y = this.y - this.dy
+    // else if (downPressed==true) this.y = this.y + this.dy
+
+    // if (this.x + this.dx > canvas.width - ballRadius)  this.x = canvas.width - ballRadius;
+    // else if (this.x + this.dx < ballRadius) this.x = ballRadius;
+
+    // if (this.y + this.dy > canvas.height - ballRadius) this.y = canvas.height - ballRadius;
+    // else if (this.y + this.dy < ballRadius) this.y = ballRadius;
   }
 }
 
 function draw() {
     maze.draw();
-    ball.draw();
     ball.update();
   }
   
-  function keyDownHandler(event) {
-    if (event.key === "Right" || event.key === "ArrowRight") {
-      rightPressed = true;
-    } else if (event.key === "Left" || event.key === "ArrowLeft") {
-      leftPressed = true;
-    } else if (event.key === "Up" || event.key === "ArrowUp") {
-      upPressed = true;
-    } else if (event.key === "Down" || event.key === "ArrowDown") {
-      downPressed = true;
-    }
+function keyDownHandler(event) {
+  if (event.key === "Right" || event.key === "ArrowRight") {
+    rightPressed = true;
+  } else if (event.key === "Left" || event.key === "ArrowLeft") {
+    leftPressed = true;
+  } else if (event.key === "Up" || event.key === "ArrowUp") {
+    upPressed = true;
+  } else if (event.key === "Down" || event.key === "ArrowDown") {
+    downPressed = true;
   }
-  
-  function keyUpHandler(event) {
-    if (event.key === "Right" || event.key === "ArrowRight") {
-      rightPressed = false;
-    } else if (event.key === "Left" || event.key === "ArrowLeft") {
-      leftPressed = false;
-    } else if (event.key === "Up" || event.key === "ArrowUp") {
-      upPressed = false;
-    } else if (event.key === "Down" || event.key === "ArrowDown") {
-      downPressed = false;
-    }
+}
+
+function keyUpHandler(event) {
+  if (event.key === "Right" || event.key === "ArrowRight") {
+    rightPressed = false;
+  } else if (event.key === "Left" || event.key === "ArrowLeft") {
+    leftPressed = false;
+  } else if (event.key === "Up" || event.key === "ArrowUp") {
+    upPressed = false;
+  } else if (event.key === "Down" || event.key === "ArrowDown") {
+    downPressed = false;
   }
+}
 
 // Set dimensions to fit a mobile phone screen (16:9 ratio)
 let screenWidth = window.innerWidth;
@@ -268,8 +271,17 @@ let maze = new Maze(mazeWidth, mazeHeight, rows, cols);
 maze.setup();
 maze.generateMaze();
 
-const ballRadius = 7.5;
-let ball = new Ball(mazeWidth/2-2*ballRadius, mazeHeight/2-2*ballRadius, maze.width/cols, maze.height/rows);
+// const ballRadius = 7.5;
+// let ball = new Ball(mazeWidth/2-2*ballRadius, mazeHeight/2-2*ballRadius, maze.width/cols, maze.height/rows);
+let ballElement = document.getElementById("ball");
+// ballElement.scroll(0, 1000)
+// ballElement.style.top = 100;
+// let x = parseInt(ballElement.offsetLeft);
+// let y = parseInt(ballElement.offsetTop);
+let ball = new Ball(ballElement, 2, 2);
+
+// let ballX = 0
+// let ballY = mazeHeight / 2 - ball.y / 2;
 
 let rightPressed = false;
 let leftPressed = false;

@@ -14,60 +14,13 @@
         background: #f0f0f0;
       }
       canvas {
-        border: 1px solid #000;
+        border: 5px solid #000;
+        border-radius: 100%;
       }
     </style>
   </head>
   <body>
-    <canvas id="myCanvas" width="800" height="600"></canvas>
-    <script>
-      const canvas = document.getElementById("myCanvas");
-      const ctx = canvas.getContext("2d");
-
-      const ballRadius = 20;
-      let ballX = canvas.width / 2;
-      let ballY = canvas.height / 2;
-      let dx = 0;
-      let dy = 0;
-
-      function drawBall() {
-        ctx.clearRect(0, 0, canvas.width, canvas.height);
-        ctx.beginPath();
-        ctx.arc(ballX, ballY, ballRadius, 0, Math.PI * 2);
-        ctx.fillStyle = "#0095DD";
-        ctx.fill();
-        ctx.closePath();
-      }
-
-      function updateBallPosition() {
-        ballX += dx;
-        ballY += dy;
-
-        if (ballX + ballRadius > canvas.width || ballX - ballRadius < 0) {
-          dx = -dx;
-        }
-        if (ballY + ballRadius > canvas.height || ballY - ballRadius < 0) {
-          dy = -dy;
-        }
-      }
-
-      function handleOrientation(event) {
-        let tiltX = event.gamma; // left-to-right tilt in degrees [-90, 90]
-        let tiltY = event.beta; // front-to-back tilt in degrees [-180, 180]
-
-        dx = tiltX / 10; // adjust speed
-        dy = tiltY / 10; // adjust speed
-      }
-
-      function gameLoop() {
-        updateBallPosition();
-        drawBall();
-        requestAnimationFrame(gameLoop);
-      }
-
-      window.addEventListener("deviceorientation", handleOrientation);
-
-      gameLoop();
-    </script>
+    <canvas id="myCanvas" width="600" height="600"></canvas>
+    <script src="gyro2.js"></script>
   </body>
 </html>

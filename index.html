@@ -11,36 +11,40 @@
         height: 100%;
         display: flex;
         justify-content: left;
+        flex-direction: column;
         align-items: center;
         background-color: #f0f0f0;
       }
 
       #myCanvas {
         border: 1px solid #000;
-        width: 75vw;
-        height: 90vh;
-        flex: 8;
+        /* width: 100vw; */
+        height: 70vh;
+        aspect-ratio: 1/1;
       }
 
       #infoContainer {
-        flex-direction: column;
+        flex-direction: row;
         display: flex;
         align-items: center;
-        justify-content: end;
-        width: 15vw;
-        height: 90vh;
-        flex: 1;
+        justify-content: center;
+        /* width: 90vw; */
+        aspect-ratio: 3/1;
+        height: 20vh;
+        padding: 2vw;
       }
 
       #playerInfo {
-        flex: 3;
+        display: flex;
+        flex-direction: column;
+        align-items: start;
+        flex: 1;
       }
 
       #gyroContainer {
         padding: 10px 10px 10px 10px;
-        flex: 1;
         display: flex;
-
+        flex:1;
       }
 
       #gyro {
@@ -52,7 +56,7 @@
       }
 
       #buffer {
-        height: 20vh;
+        flex: 3;
       }
 
     </style>
@@ -61,21 +65,24 @@
     <canvas id="myCanvas"></canvas>
     <div id="infoContainer">
       <div id="playerInfo">
-        <h3>Players</h3>
+        <h3 id="playerInfoHeader">Players</h3>
         <div class="player" id="player1">
-          <p>Player1</p>
+          Player1
         </div>
         <div class="player" id="player2">
-          <p>Player2</p>
+          Player2
         </div>
         <div class="player" id="player3">
-          <p>Player3</p>
+          Player3
         </div>
         <div class="player" id="player4">
-          <p>Player4</p>
+          Player4
         </div>
       </div>
       <div id="buffer">
+        <div id="ballXCoordinate"></div>
+        <div id="ballYCoordinate"></div>
+        <div id="gyroRadius"></div>
       </div>
       <div id="gyroContainer">
         <canvas id="gyro"></canvas>

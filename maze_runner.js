@@ -23,7 +23,8 @@ class Maze {
             this.rows,
             this.cols,
             r,
-            c
+            c,
+            Math.round(this.width / 10)
           );
           row.push(cell);
         }
@@ -71,7 +72,8 @@ class Cell {
       rows,
       cols,
       rowNum,
-      colNum
+      colNum, 
+      lineWidth
   ) {
       this.parentWidth = parentWidth;
       this.parentHeight = parentHeight;
@@ -117,7 +119,7 @@ class Cell {
   }
 
   drawLine(fromX, fromY, toX, toY) {
-      ctx.lineWidth = 2;
+      ctx.lineWidth = this.lineWidth;
       ctx.strokeStyle = "white";
       ctx.beginPath();
       ctx.moveTo(fromX, fromY);
@@ -216,6 +218,13 @@ class Ball {
     else if (upPressed==true && (maze.grid[row][col].walls.topWall==false)) this.y = this.y - this.dy
     else if (downPressed==true && (maze.grid[row][col].walls.bottomWall==false)) this.y = this.y + this.dy
 
+    let ballXCoordinate = document.getElementById("ballXCoordinate").textContent;
+    let ballYCoordinate = document.getElementById("ballYCoordinate").textContent;
+    let gyroRadius = document.getElementById("gyroRadius").textContent;
+
+    this.x = this.x + Math.round(ballXCoordinate/gyroRadius);
+    this.y = this.y + Math.round(ballYCoordinate/gyroRadius);
+
     if (this.x + this.dx > canvas.width - ballRadius)  this.x = canvas.width - ballRadius;
     else if (this.x + this.dx < ballRadius) this.x = ballRadius;
 
@@ -228,47 +237,57 @@ function draw() {
     maze.draw();
     ball.draw();
     ball.update();
-  }
+}
   
-  function keyDownHandler(event) {
-    if (event.key === "Right" || event.key === "ArrowRight") {
-      rightPressed = true;
-    } else if (event.key === "Left" || event.key === "ArrowLeft") {
-      leftPressed = true;
-    } else if (event.key === "Up" || event.key === "ArrowUp") {
-      upPressed = true;
-    } else if (event.key === "Down" || event.key === "ArrowDown") {
-      downPressed = true;
-    }
+function keyDownHandler(event) {
+  if (event.key === "Right" || event.key === "ArrowRight") {
+    rightPressed = true;
+  } else if (event.key === "Left" || event.key === "ArrowLeft") {
+    leftPressed = true;
+  } else if (event.key === "Up" || event.key === "ArrowUp") {
+    upPressed = true;
+  } else if (event.key === "Down" || event.key === "ArrowDown") {
+    downPressed = true;
   }
+}
   
-  function keyUpHandler(event) {
-    if (event.key === "Right" || event.key === "ArrowRight") {
-      rightPressed = false;
-    } else if (event.key === "Left" || event.key === "ArrowLeft") {
-      leftPressed = false;
-    } else if (event.key === "Up" || event.key === "ArrowUp") {
-      upPressed = false;
-    } else if (event.key === "Down" || event.key === "ArrowDown") {
-      downPressed = false;
-    }
+function keyUpHandler(event) {
+  if (event.key === "Right" || event.key === "ArrowRight") {
+    rightPressed = false;
+  } else if (event.key === "Left" || event.key === "ArrowLeft") {
+    leftPressed = false;
+  } else if (event.key === "Up" || event.key === "ArrowUp") {
+    upPressed = false;
+  } else if (event.key === "Down" || event.key === "ArrowDown") {
+    downPressed = false;
   }
+}
+
+// function resizeCanvas() {
+//   const size = Math.min(window.innerWidth, window.innerHeight) * 0.5;
+//   canvas.width = size;
+//   canvas.height = size;
+//   ballRadius = Math.round((1/3) * Math.round((mazeWidth / cols)));
+//   draw()
+// }
 
 // Set dimensions to fit a mobile phone screen (16:9 ratio)
 let screenWidth = window.innerWidth;
 let screenHeight = window.innerHeight;
-let mazeWidth = screenWidth-5;
-let mazeHeight = screenHeight-5;
+// let mazeWidth = screenWidth-5;
+// let mazeHeight = screenHeight-5;
+let mazeWidth = canvas.width;
+let mazeHeight = canvas.height;
 
 // Set number of rows and columns
 let rows = 16; // This can be adjusted based on desired cell size
-let cols = 32; // This can be adjusted based on desired cell size
+let cols = 16; // This can be adjusted based on desired cell size
 
 let maze = new Maze(mazeWidth, mazeHeight, rows, cols);
 maze.setup();
 maze.generateMaze();
 
-const ballRadius = 7.5;
+let ballRadius = Math.round((1/10) * Math.round((mazeWidth / cols)));
 let ball = new Ball(mazeWidth/2-2*ballRadius, mazeHeight/2-2*ballRadius, maze.width/cols, maze.height/rows);
 
 let rightPressed = false;
@@ -277,5 +296,10 @@ let upPressed = false;
 let downPressed = false;
 
 document.addEventListener("keydown", keyDownHandler, false);
+window.addEventListener("deviceorientation", draw)
 document.addEventListener("keyup", keyUpHandler, false);
+
+window.addEventListener('resize', resizeCanvas);
+resizeCanvas(); // Initial call to set up canvas size
+
 setInterval(draw, 100);

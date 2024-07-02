@@ -6,6 +6,7 @@ const io = require("socket.io")(http);
 app.use(express.static("public"));
 
 const rooms = new Map();
+const MAX_PLAYERS = 4;
 
 io.on("connection", (socket) => {
   socket.on("createRoom", () => {
@@ -18,11 +19,20 @@ io.on("connection", (socket) => {
   socket.on("joinRoom", ({ name, roomCode }) => {
     const room = rooms.get(roomCode);
     if (room) {
-      room.players.push({ id: socket.id, name });
-      socket.join(roomCode);
-      socket.to(roomCode).emit("playerJoined", { name });
-      io.to(room.host).emit("updatePlayerList", room.players);
-      socket.emit("joinedRoom", { roomCode, isHost: false });
+      if (room.players.length >= MAX_PLAYERS) {
+        socket.emit("error", "Room is full");
+      } else {
+        room.players.push({ id: socket.id, name });
+        socket.join(roomCode);
+        socket.to(roomCode).emit("playerJoined", { name });
+        io.to(room.host).emit("updatePlayerList", room.players);
+        socket.emit("joinedRoom", { roomCode, isHost: false });
+
+        // Check if room is full after joining
+        if (room.players.length === MAX_PLAYERS) {
+          io.to(roomCode).emit("roomFull");
+        }
+      }
     } else {
       socket.emit("error", "Room not found");
     }
@@ -32,6 +42,13 @@ io.on("connection", (socket) => {
     const room = rooms.get(roomCode);
     if (room && room.host === socket.id) {
       io.to(roomCode).emit("gameStarted");
+    }
+  });
+
+  socket.on("gyroscopeData", ({ roomCode, data }) => {
+    const room = rooms.get(roomCode);
+    if (room && room.host) {
+      io.to(room.host).emit("gyroscopeUpdate", { playerId: socket.id, data });
     }
   });
 
@@ -46,13 +63,6 @@ io.on("connection", (socket) => {
       }
     });
   });
-
-  socket.on("gyroscopeData", ({ roomCode, data }) => {
-    const room = rooms.get(roomCode);
-    if (room && room.host) {
-      io.to(room.host).emit("gyroscopeUpdate", { playerId: socket.id, data });
-    }
-  });
 });
 
 function generateRoomCode() {
@@ -63,5 +73,3 @@ const PORT = process.env.PORT || 3000;
 http.listen(PORT, () => {
   console.log(`Server running on port ${PORT}`);
 });
-
-// Add this inside your io.on('connection', (socket) => { ... }) handler

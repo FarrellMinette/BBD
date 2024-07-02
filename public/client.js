@@ -12,9 +12,12 @@ const playerNameInput = document.getElementById("player-name");
 const roomCodeInput = document.getElementById("room-code");
 const roomCodeDisplay = document.getElementById("room-code-display");
 const playerList = document.getElementById("player-list");
+const roomStatus = document.getElementById("room-status");
 
 let currentRoom = null;
 let isHost = false;
+let gyroscopeInterval = null;
+const gyroscopeData = { alpha: 0, beta: 0, gamma: 0 };
 
 createRoomBtn.addEventListener("click", () => {
   socket.emit("createRoom");
@@ -46,6 +49,7 @@ socket.on("roomCreated", (roomCode) => {
   lobby.style.display = "block";
   roomCodeDisplay.textContent = roomCode;
   startGameBtn.style.display = "block";
+  roomStatus.textContent = "Waiting for players...";
 });
 
 socket.on("joinedRoom", ({ roomCode, isHost: hostStatus }) => {
@@ -75,11 +79,40 @@ socket.on("playerLeft", ({ name }) => {
   if (playerToRemove) {
     playerList.removeChild(playerToRemove);
   }
+  roomStatus.textContent = "Waiting for players...";
+});
+
+socket.on("roomFull", () => {
+  roomStatus.textContent = "Room is full. Ready to start!";
+  if (isHost) {
+    startGameBtn.disabled = false;
+  }
 });
 
 socket.on("gameStarted", () => {
   lobby.style.display = "none";
   game.style.display = "block";
+
+  if (!isHost) {
+    // Request permission to use the gyroscope on mobile devices
+    if (
+      typeof DeviceOrientationEvent !== "undefined" &&
+      typeof DeviceOrientationEvent.requestPermission === "function"
+    ) {
+      DeviceOrientationEvent.requestPermission()
+        .then((permissionState) => {
+          if (permissionState === "granted") {
+            window.addEventListener("deviceorientation", handleOrientation);
+            startSendingGyroscopeData();
+          }
+        })
+        .catch(console.error);
+    } else {
+      // For devices that don't require permission
+      window.addEventListener("deviceorientation", handleOrientation);
+      startSendingGyroscopeData();
+    }
+  }
 });
 
 socket.on("error", (message) => {
@@ -93,11 +126,19 @@ function updatePlayerList(players) {
     li.textContent = player.name;
     playerList.appendChild(li);
   });
-}
 
-// Add these variables at the top of your client.js file
-let gyroscopeInterval = null;
-const gyroscopeData = { alpha: 0, beta: 0, gamma: 0 };
+  if (players.length < 4) {
+    roomStatus.textContent = `Waiting for players... (${players.length}/4)`;
+    if (isHost) {
+      startGameBtn.disabled = true;
+    }
+  } else {
+    roomStatus.textContent = "Room is full. Ready to start!";
+    if (isHost) {
+      startGameBtn.disabled = false;
+    }
+  }
+}
 
 // Add this function to handle gyroscope data
 function handleOrientation(event) {

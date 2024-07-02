@@ -117,7 +117,7 @@ class Cell {
   }
 
   drawLine(fromX, fromY, toX, toY) {
-      ctx.lineWidth = 2;
+      ctx.lineWidth = 7.5;
       ctx.strokeStyle = "white";
       ctx.beginPath();
       ctx.moveTo(fromX, fromY);
@@ -192,67 +192,69 @@ class Cell {
 }
   
 class Ball {
-  constructor(x, y, dx, dy) {
-    this.x = x;
-    this.y = y;
+  constructor(ballElement, dx, dy, ax, ay) {
+    this.ballElement = ballElement
     this.dx = dx;
     this.dy = dy;
-  }
-
-  draw() {
-    ctx.beginPath();
-    ctx.arc(this.x, this.y, ballRadius, 0, Math.PI * 2);
-    ctx.fillStyle = "#0095DD";
-    ctx.fill();
-    ctx.closePath();
+    this.ax = ax;
+    this.ay = ay;
+    this.x = ballElement.offsetLeft
+    this.y = ballElement.offsetTop
+    this.ballRadius = 15
   }
 
   update() {
-    let row = Math.floor(this.y/this.dy)
-    let col = Math.floor(this.x/this.dx)
+    this.ballElement.style.left = this.x + "px";
+    this.ballElement.style.top = this.y + "px";
 
-    if ((rightPressed==true) && (maze.grid[row][col].walls.rightWall==false)) this.x = this.x + this.dx
-    else if (leftPressed==true && (maze.grid[row][col].walls.leftWall==false)) this.x = this.x - this.dx
-    else if (upPressed==true && (maze.grid[row][col].walls.topWall==false)) this.y = this.y - this.dy
-    else if (downPressed==true && (maze.grid[row][col].walls.bottomWall==false)) this.y = this.y + this.dy
+    if ((rightPressed==true)) {
+      let colors = ctx.getImageData(this.x + this.ballRadius, this.y, 1, 1).data
+      if (colors[0]+colors[1]+colors[2]<50) this.x = this.x + this.dx
+    }
+    else if (leftPressed==true) {
+      let colors = ctx.getImageData(this.x - this.ballRadius, this.y, 1, 1).data
+      if (colors[0]+colors[1]+colors[2]<50) this.x = this.x - this.dx
+    }
+    else if (upPressed==true) {
+      let colors = ctx.getImageData(this.x, this.y - this.ballRadius, 1, 1).data
+      if (colors[0]+colors[1]+colors[2]<50) this.y = this.y - this.dy 
+    }
 
-    if (this.x + this.dx > canvas.width - ballRadius)  this.x = canvas.width - ballRadius;
-    else if (this.x + this.dx < ballRadius) this.x = ballRadius;
-
-    if (this.y + this.dy > canvas.height - ballRadius) this.y = canvas.height - ballRadius;
-    else if (this.y + this.dy < ballRadius) this.y = ballRadius;
+    else if (downPressed==true){
+      let colors = ctx.getImageData(this.x, this.y + this.ballRadius, 1, 1).data
+      if (colors[0]+colors[1]+colors[2]<50) this.y = this.y + this.dy
+    }
   }
 }
 
 function draw() {
     maze.draw();
-    ball.draw();
     ball.update();
   }
   
-  function keyDownHandler(event) {
-    if (event.key === "Right" || event.key === "ArrowRight") {
-      rightPressed = true;
-    } else if (event.key === "Left" || event.key === "ArrowLeft") {
-      leftPressed = true;
-    } else if (event.key === "Up" || event.key === "ArrowUp") {
-      upPressed = true;
-    } else if (event.key === "Down" || event.key === "ArrowDown") {
-      downPressed = true;
-    }
+function keyDownHandler(event) {
+  if (event.key === "Right" || event.key === "ArrowRight") {
+    rightPressed = true;
+  } else if (event.key === "Left" || event.key === "ArrowLeft") {
+    leftPressed = true;
+  } else if (event.key === "Up" || event.key === "ArrowUp") {
+    upPressed = true;
+  } else if (event.key === "Down" || event.key === "ArrowDown") {
+    downPressed = true;
   }
-  
-  function keyUpHandler(event) {
-    if (event.key === "Right" || event.key === "ArrowRight") {
-      rightPressed = false;
-    } else if (event.key === "Left" || event.key === "ArrowLeft") {
-      leftPressed = false;
-    } else if (event.key === "Up" || event.key === "ArrowUp") {
-      upPressed = false;
-    } else if (event.key === "Down" || event.key === "ArrowDown") {
-      downPressed = false;
-    }
+}
+
+function keyUpHandler(event) {
+  if (event.key === "Right" || event.key === "ArrowRight") {
+    rightPressed = false;
+  } else if (event.key === "Left" || event.key === "ArrowLeft") {
+    leftPressed = false;
+  } else if (event.key === "Up" || event.key === "ArrowUp") {
+    upPressed = false;
+  } else if (event.key === "Down" || event.key === "ArrowDown") {
+    downPressed = false;
   }
+}
 
 // Set dimensions to fit a mobile phone screen (16:9 ratio)
 let screenWidth = window.innerWidth;
@@ -268,8 +270,8 @@ let maze = new Maze(mazeWidth, mazeHeight, rows, cols);
 maze.setup();
 maze.generateMaze();
 
-const ballRadius = 7.5;
-let ball = new Ball(mazeWidth/2-2*ballRadius, mazeHeight/2-2*ballRadius, maze.width/cols, maze.height/rows);
+let ballElement = document.getElementById("ball");
+let ball = new Ball(ballElement, 2, 2, 0, 0);
 
 let rightPressed = false;
 let leftPressed = false;
@@ -278,4 +280,4 @@ let downPressed = false;
 
 document.addEventListener("keydown", keyDownHandler, false);
 document.addEventListener("keyup", keyUpHandler, false);
-setInterval(draw, 100);
+setInterval(draw, 10);

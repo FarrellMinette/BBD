@@ -1,0 +1,38 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Lobby - Maze Game</title>
+    <link rel="stylesheet" href="lobby.css" />
+</head>
+<body>
+    <div class="header">
+        <h1>Maze Game</h1>
+    </div>
+    <div class="form-container">
+        <h2>Lobby</h2>
+        <div class="create-room">
+            <h3>Create a Room</h3>
+            <form id="createRoomForm" onsubmit="createRoom(event)">
+                <label for="roomName">Room Name</label>
+                <input type="text" id="roomName" name="roomName" required>
+                <label for="roomCode">Room Code</label>
+                <input type="text" id="roomCode" name="roomCode" required>
+                <button type="submit">Create Room</button>
+               
+            </form>
+        </div>
+        <div class="join-room">
+            <h3>Join an Existing Room</h3>
+            <form id="joinRoomForm" onsubmit="joinRoom(event)">
+                <label for="roomCode">Room Code</label>
+                <input type="text" id="roomCode" name="roomCode" required>
+                <button type="submit">Join Room</button>
+            </form>
+        </div>
+        <button class="back-button" onclick="location.href='homepage.html'">Back</button>
+    </div>
+    </div>
+
+    <script  src="lobby.js"></script>
+</body>
+</html>

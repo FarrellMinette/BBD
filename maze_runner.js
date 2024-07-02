@@ -192,10 +192,12 @@ class Cell {
 }
   
 class Ball {
-  constructor(ballElement, dx, dy) {
+  constructor(ballElement, dx, dy, ax, ay) {
     this.ballElement = ballElement
     this.dx = dx;
     this.dy = dy;
+    this.ax = ax;
+    this.ay = ay;
     this.x = ballElement.offsetLeft
     this.y = ballElement.offsetTop
     this.ballRadius = 15
@@ -206,28 +208,22 @@ class Ball {
     this.ballElement.style.top = this.y + "px";
 
     if ((rightPressed==true)) {
-      let colors = ctx.getImageData(this.x + this.ballRadius, this.y, 5, 5).data
+      let colors = ctx.getImageData(this.x + this.ballRadius, this.y, 1, 1).data
       if (colors[0]+colors[1]+colors[2]<50) this.x = this.x + this.dx
     }
     else if (leftPressed==true) {
-      let colors = ctx.getImageData(this.x - this.ballRadius, this.y, 5, 5).data
+      let colors = ctx.getImageData(this.x - this.ballRadius, this.y, 1, 1).data
       if (colors[0]+colors[1]+colors[2]<50) this.x = this.x - this.dx
     }
     else if (upPressed==true) {
-      let colors = ctx.getImageData(this.x, this.y - this.ballRadius, 5, 5).data
+      let colors = ctx.getImageData(this.x, this.y - this.ballRadius, 1, 1).data
       if (colors[0]+colors[1]+colors[2]<50) this.y = this.y - this.dy 
     }
 
     else if (downPressed==true){
-      let colors = ctx.getImageData(this.x, this.y + this.ballRadius, 5, 5).data
+      let colors = ctx.getImageData(this.x, this.y + this.ballRadius, 1, 1).data
       if (colors[0]+colors[1]+colors[2]<50) this.y = this.y + this.dy
     }
-
-    // if (this.x + this.dx > canvas.width - this.ballRadius)  this.x = canvas.width - this.ballRadius;
-    // else if (this.x + this.dx < this.ballRadius) this.x = this.ballRadius;
-
-    // if (this.y + this.dy > canvas.height - this.ballRadius) this.y = canvas.height - this.ballRadius;
-    // else if (this.y + this.dy < this.ballRadius) this.y = this.ballRadius;
   }
 }
 
@@ -275,7 +271,7 @@ maze.setup();
 maze.generateMaze();
 
 let ballElement = document.getElementById("ball");
-let ball = new Ball(ballElement, 5, 5);
+let ball = new Ball(ballElement, 2, 2, 0, 0);
 
 let rightPressed = false;
 let leftPressed = false;

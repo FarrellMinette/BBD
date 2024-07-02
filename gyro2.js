@@ -12,6 +12,7 @@ function resizeCanvas() {
   const size = Math.min(window.innerWidth, window.innerHeight) * 0.5;
   canvas.width = size;
   canvas.height = size;
+  document.getElementById("gyroRadius").textContent = size/ 2;
   ballRadius = canvas.width / 10;
   originX = canvas.width / 2;
   originY = canvas.height / 2;
@@ -35,7 +36,7 @@ function updateBallPosition() {
     let addXRadius = ballRadius;
     let addYRadius = ballRadius;
     let addXAdjustment;
-    let addYAdjustment
+    let addYAdjustment;
 
     if (ballXCoordinate > 0) {
         addXRadius = ballRadius;
@@ -60,13 +61,16 @@ function updateBallPosition() {
   ballX += dx;
   ballY += dy;
 
+  document.getElementById("ballXCoordinate").textContent = Math.round(ballXCoordinate);
+  document.getElementById("ballYCoordinate").textContent = Math.round(ballYCoordinate);
+
 }
 
 function handleOrientation(event) {
-  let tiltY = -event.gamma; // left-to-right tilt in degrees [-90, 90]
-  let tiltX = event.beta; // front-to-back tilt in degrees [-180, 180
-  dx = tiltX / 10; // adjust speed
-  dy = tiltY / 10; // adjust speed
+  let tiltY = event.beta; // left-to-right tilt in degrees [-90, 90]
+  let tiltX = event.gamma; // front-to-back tilt in degrees [-180, 180
+  dx = tiltX / 5; // adjust speed
+  dy = tiltY / 5; // adjust speed
 }
 
 function gameLoop() {

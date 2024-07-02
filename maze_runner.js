@@ -200,29 +200,54 @@ class Ball {
     this.ay = ay;
     this.x = ballElement.offsetLeft
     this.y = ballElement.offsetTop
-    this.ballRadius = 15
+    this.ballRadius = 20
   }
 
   update() {
     this.ballElement.style.left = this.x + "px";
     this.ballElement.style.top = this.y + "px";
 
-    if ((rightPressed==true)) {
-      let colors = ctx.getImageData(this.x + this.ballRadius, this.y, 1, 1).data
-      if (colors[0]+colors[1]+colors[2]<50) this.x = this.x + this.dx
-    }
-    else if (leftPressed==true) {
-      let colors = ctx.getImageData(this.x - this.ballRadius, this.y, 1, 1).data
-      if (colors[0]+colors[1]+colors[2]<50) this.x = this.x - this.dx
-    }
-    else if (upPressed==true) {
-      let colors = ctx.getImageData(this.x, this.y - this.ballRadius, 1, 1).data
-      if (colors[0]+colors[1]+colors[2]<50) this.y = this.y - this.dy 
-    }
+    if (rightPressed==true || leftPressed==true || upPressed==true || downPressed == true) {
+      let num = 15
+      let colors = ctx.getImageData(this.x, this.y, num, num).data
+      let col_sum = 0 
+      for (let i=0; i<num**2; i++) {
+        col_sum += colors[0+i*4]+colors[1+i*4]+colors[2+4*i];
+      }
+      if (col_sum < 50) {
+        if ((rightPressed==true)) {
+          colors = ctx.getImageData(this.x + this.ballRadius, this.y, 1, 1).data
+          if (colors[0]+colors[1]+colors[2]<50) this.x = this.x + this.dx 
+        }
+        else if (leftPressed==true) {
+          colors = ctx.getImageData(this.x - 0.6*this.ballRadius, this.y, 1, 1).data
+          if (colors[0]+colors[1]+colors[2]<50) this.x = this.x - this.dx
+        }
+        else if (upPressed==true) {
+          colors = ctx.getImageData(this.x, this.y - 0.8*this.ballRadius, 1, 1).data
+          if (colors[0]+colors[1]+colors[2]<50) this.y = this.y - this.dy 
+        }
+        else if (downPressed==true){
+          colors = ctx.getImageData(this.x, this.y + this.ballRadius, 1, 1).data
+          if (colors[0]+colors[1]+colors[2]<50) this.y = this.y + this.dy
+        }
+      }
+      else { 
+        console.log(col_sum)
+        if ((rightPressed==true)) {
+          this.x = this.x - 1*this.dx 
+        }
+        else if (leftPressed==true) {
+          this.x = this.x + 1*this.dx
+        }
+        else if (upPressed==true) {
+          this.y = this.y + 1*this.dy 
+        }
+        else if (downPressed==true){
+          this.y = this.y - 1*this.dy
+        }
 
-    else if (downPressed==true){
-      let colors = ctx.getImageData(this.x, this.y + this.ballRadius, 1, 1).data
-      if (colors[0]+colors[1]+colors[2]<50) this.y = this.y + this.dy
+      }
     }
   }
 }

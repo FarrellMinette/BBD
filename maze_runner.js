@@ -209,15 +209,15 @@ class Ball {
     this.ballElement.style.left = this.x + "px";
     this.ballElement.style.top = this.y + "px";
 
-//     let ballXCoordinate = document.getElementById("ballXCoordinate").textContent;
-//     let ballYCoordinate = document.getElementById("ballYCoordinate").textContent;
-//     let gyroRadius = document.getElementById("gyroRadius").textContent;
+    let ballXCoordinate = document.getElementById("ballXCoordinate").textContent;
+    let ballYCoordinate = document.getElementById("ballYCoordinate").textContent;
+    let gyroRadius = document.getElementById("gyroRadius").textContent;
 
-//     this.x = this.x + Math.round(ballXCoordinate/gyroRadius);
-//     this.y = this.y + Math.round(ballYCoordinate/gyroRadius);
+    this.x = this.x + Math.round(ballXCoordinate/gyroRadius);
+    this.y = this.y + Math.round(ballYCoordinate/gyroRadius);
 
-//     if (this.x + this.dx > canvas.width - ballRadius)  this.x = canvas.width - ballRadius;
-//     else if (this.x + this.dx < ballRadius) this.x = ballRadius;
+    if (this.x + this.dx > canvas.width - ballRadius)  this.x = canvas.width - ballRadius;
+    else if (this.x + this.dx < ballRadius) this.x = ballRadius;
 
     if (rightPressed==true || leftPressed==true || upPressed==true || downPressed == true) {
       let num = 15

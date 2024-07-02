@@ -69,8 +69,8 @@ function updateBallPosition() {
 function handleOrientation(event) {
   let tiltY = event.beta; // left-to-right tilt in degrees [-90, 90]
   let tiltX = event.gamma; // front-to-back tilt in degrees [-180, 180
-  dx = tiltX / 10; // adjust speed
-  dy = tiltY / 10; // adjust speed
+  dx = tiltX / 5; // adjust speed
+  dy = tiltY / 5; // adjust speed
 }
 
 function gameLoop() {

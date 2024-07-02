@@ -11,7 +11,7 @@ const MAX_PLAYERS = 4;
 io.on("connection", (socket) => {
   socket.on("createRoom", () => {
     const roomCode = generateRoomCode();
-    rooms.set(roomCode, { host: socket.id, players: [] });
+    rooms.set(roomCode, { host: socket.id, players: [], gameStarted: false });
     socket.join(roomCode);
     socket.emit("roomCreated", roomCode);
   });
@@ -19,8 +19,8 @@ io.on("connection", (socket) => {
   socket.on("joinRoom", ({ name, roomCode }) => {
     const room = rooms.get(roomCode);
     if (room) {
-      if (room.players.length >= MAX_PLAYERS) {
-        socket.emit("error", "Room is full");
+      if (room.players.length >= MAX_PLAYERS || room.gameStarted) {
+        socket.emit("error", "Room is full or game has already started");
       } else {
         room.players.push({ id: socket.id, name });
         socket.join(roomCode);
@@ -28,7 +28,6 @@ io.on("connection", (socket) => {
         io.to(room.host).emit("updatePlayerList", room.players);
         socket.emit("joinedRoom", { roomCode, isHost: false });
 
-        // Check if room is full after joining
         if (room.players.length === MAX_PLAYERS) {
           io.to(roomCode).emit("roomFull");
         }
@@ -41,6 +40,7 @@ io.on("connection", (socket) => {
   socket.on("startGame", (roomCode) => {
     const room = rooms.get(roomCode);
     if (room && room.host === socket.id) {
+      room.gameStarted = true;
       io.to(roomCode).emit("gameStarted");
     }
   });

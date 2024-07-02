@@ -79,14 +79,11 @@ socket.on("playerLeft", ({ name }) => {
   if (playerToRemove) {
     playerList.removeChild(playerToRemove);
   }
-  roomStatus.textContent = "Waiting for players...";
+  updateRoomStatus(playerList.children.length);
 });
 
 socket.on("roomFull", () => {
   roomStatus.textContent = "Room is full. Ready to start!";
-  if (isHost) {
-    startGameBtn.disabled = false;
-  }
 });
 
 socket.on("gameStarted", () => {
@@ -126,17 +123,20 @@ function updatePlayerList(players) {
     li.textContent = player.name;
     playerList.appendChild(li);
   });
+  updateRoomStatus(players.length);
+}
 
-  if (players.length < 4) {
-    roomStatus.textContent = `Waiting for players... (${players.length}/4)`;
-    if (isHost) {
-      startGameBtn.disabled = true;
-    }
+function updateRoomStatus(playerCount) {
+  if (playerCount < 4) {
+    roomStatus.textContent = `Players: ${playerCount}/4 - Waiting for more players...`;
   } else {
     roomStatus.textContent = "Room is full. Ready to start!";
-    if (isHost) {
-      startGameBtn.disabled = false;
-    }
+  }
+
+  if (isHost) {
+    startGameBtn.disabled = false;
+    startGameBtn.textContent =
+      playerCount > 1 ? "Start Game" : "Wait for players";
   }
 }
 

@@ -198,8 +198,8 @@ class Ball {
     this.dy = dy;
     this.ax = ax;
     this.ay = ay;
-    this.x = 15
-    this.y = 15
+    this.x = ballElement.offsetLeft
+    this.y = ballElement.offsetTop
     this.ballRadius = 20
   }
 

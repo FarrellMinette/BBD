@@ -117,7 +117,7 @@ class Cell {
   }
 
   drawLine(fromX, fromY, toX, toY) {
-      ctx.lineWidth = 2;
+      ctx.lineWidth = 7.5;
       ctx.strokeStyle = "white";
       ctx.beginPath();
       ctx.moveTo(fromX, fromY);
@@ -196,35 +196,38 @@ class Ball {
     this.ballElement = ballElement
     this.dx = dx;
     this.dy = dy;
-    this.x = ballElement.style.left
-    this.y = ballElement.style.top
-    // this.x = this.ballElement.style.left
-    // this.y = this.ballElement.style.top
+    this.x = ballElement.offsetLeft
+    this.y = ballElement.offsetTop
+    this.ballRadius = 15
   }
 
   update() {
+    this.ballElement.style.left = this.x + "px";
+    this.ballElement.style.top = this.y + "px";
 
-    // this.ballElement.scroll({top: 100,
-    //   left: 100,
-    //   behavior: "smooth",});
-    this.x = 100;
-    this.y = 100;
+    if ((rightPressed==true)) {
+      let colors = ctx.getImageData(this.x + this.ballRadius, this.y, 5, 5).data
+      if (colors[0]+colors[1]+colors[2]<50) this.x = this.x + this.dx
+    }
+    else if (leftPressed==true) {
+      let colors = ctx.getImageData(this.x - this.ballRadius, this.y, 5, 5).data
+      if (colors[0]+colors[1]+colors[2]<50) this.x = this.x - this.dx
+    }
+    else if (upPressed==true) {
+      let colors = ctx.getImageData(this.x, this.y - this.ballRadius, 5, 5).data
+      if (colors[0]+colors[1]+colors[2]<50) this.y = this.y - this.dy 
+    }
 
-    console.log(this.x, this.y)
+    else if (downPressed==true){
+      let colors = ctx.getImageData(this.x, this.y + this.ballRadius, 5, 5).data
+      if (colors[0]+colors[1]+colors[2]<50) this.y = this.y + this.dy
+    }
 
-    // this.ballElement.style.left = this.x;
-    // this.ballElement.style.top = this.y;
+    // if (this.x + this.dx > canvas.width - this.ballRadius)  this.x = canvas.width - this.ballRadius;
+    // else if (this.x + this.dx < this.ballRadius) this.x = this.ballRadius;
 
-    // if ((rightPressed==true)) this.x = this.x + this.dx
-    // else if (leftPressed==true) this.x = this.x - this.dx
-    // else if (upPressed==true) this.y = this.y - this.dy
-    // else if (downPressed==true) this.y = this.y + this.dy
-
-    // if (this.x + this.dx > canvas.width - ballRadius)  this.x = canvas.width - ballRadius;
-    // else if (this.x + this.dx < ballRadius) this.x = ballRadius;
-
-    // if (this.y + this.dy > canvas.height - ballRadius) this.y = canvas.height - ballRadius;
-    // else if (this.y + this.dy < ballRadius) this.y = ballRadius;
+    // if (this.y + this.dy > canvas.height - this.ballRadius) this.y = canvas.height - this.ballRadius;
+    // else if (this.y + this.dy < this.ballRadius) this.y = this.ballRadius;
   }
 }
 
@@ -271,17 +274,8 @@ let maze = new Maze(mazeWidth, mazeHeight, rows, cols);
 maze.setup();
 maze.generateMaze();
 
-// const ballRadius = 7.5;
-// let ball = new Ball(mazeWidth/2-2*ballRadius, mazeHeight/2-2*ballRadius, maze.width/cols, maze.height/rows);
 let ballElement = document.getElementById("ball");
-// ballElement.scroll(0, 1000)
-// ballElement.style.top = 100;
-// let x = parseInt(ballElement.offsetLeft);
-// let y = parseInt(ballElement.offsetTop);
-let ball = new Ball(ballElement, 2, 2);
-
-// let ballX = 0
-// let ballY = mazeHeight / 2 - ball.y / 2;
+let ball = new Ball(ballElement, 5, 5);
 
 let rightPressed = false;
 let leftPressed = false;
@@ -290,4 +284,4 @@ let downPressed = false;
 
 document.addEventListener("keydown", keyDownHandler, false);
 document.addEventListener("keyup", keyUpHandler, false);
-setInterval(draw, 100);
+setInterval(draw, 10);

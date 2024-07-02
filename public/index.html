@@ -5,7 +5,27 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>Game Room</title>
     <script src="/socket.io/socket.io.js"></script>
-  </head>
+    <style>
+      .garden {
+        position: relative;
+        width: 200px;
+        height: 200px;
+        border: 5px solid #ccc;
+        border-radius: 10px;
+      }
+
+      .ball {
+        position: absolute;
+        top: 90px;
+        left: 90px;
+        width: 20px;
+        height: 20px;
+        background: green;
+        border-radius: 100%;
+      }
+    </style>
+  <link rel="stylesheet" href="grid.css">  </head>
+
   <body>
     <div id="main-menu">
       <h1>Welcome to the Game</h1>
@@ -25,14 +45,24 @@
       <p id="room-status"></p>
       <h3>Players:</h3>
       <ul id="player-list"></ul>
-      <button id="start-game" style="display: none" disabled>Start Game</button>
+      <!--CHANGED-->
+      <button id="start-game" style="display: none">Start Game</button>
     </div>
 
     <div id="game" style="display: none">
+
       <h2>Game Started!</h2>
+      <div id="center">
+        <div id="game">
+          <div id="maze">
+            <div id="end"></div>
+          </div>
+        </div>
+      </div>
       <div id="gyroscope-data"></div>
     </div>
 
     <script src="client.js"></script>
+    <script src="ball.js" defer></script>
   </body>
 </html>

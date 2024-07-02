@@ -290,13 +290,14 @@ let mazeWidth = screenWidth-5;
 let mazeHeight = screenHeight-5;
 
 // Set number of rows and columns
-let rows = 16; // This can be adjusted based on desired cell size
-let cols = 32; // This can be adjusted based on desired cell size
+let rows = 8; // This can be adjusted based on desired cell size
+let cols = 8; // This can be adjusted based on desired cell size
 
 let maze = new Maze(mazeWidth, mazeHeight, rows, cols);
 maze.setup();
 maze.generateMaze();
 
+console.log(maze)
 let ballElement = document.getElementById("ball");
 let ball = new Ball(ballElement, 2, 2, 0, 0);
 

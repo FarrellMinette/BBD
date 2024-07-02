@@ -63,13 +63,14 @@ socket.on("joinedRoom", ({ roomCode, isHost: hostStatus }) => {
   }
 });
 
-socket.on("playerJoined", ({ name }) => {
+socket.on("playerJoined", ({ name, room }) => {
   const li = document.createElement("li");
   li.textContent = name;
   playerList.appendChild(li);
 });
 
 socket.on("updatePlayerList", (players) => {
+  console.log(players);
   updatePlayerList(players);
 });
 
@@ -129,8 +130,9 @@ function updatePlayerList(players) {
 
   if (players.length < 4) {
     roomStatus.textContent = `Waiting for players... (${players.length}/4)`;
-    if (isHost) {
-      startGameBtn.disabled = true;
+    console.log(players)
+    if (isHost && players.length>=1) {
+      startGameBtn.disabled = false;
     }
   } else {
     roomStatus.textContent = "Room is full. Ready to start!";
@@ -147,41 +149,26 @@ function handleOrientation(event) {
   gyroscopeData.gamma = event.gamma; // Y-axis rotation
 }
 
-// Modify the existing socket.on('gameStarted') handler
-socket.on("gameStarted", () => {
-  lobby.style.display = "none";
-  game.style.display = "block";
-
-  if (!isHost) {
-    // Request permission to use the gyroscope on mobile devices
-    if (
-      typeof DeviceOrientationEvent !== "undefined" &&
-      typeof DeviceOrientationEvent.requestPermission === "function"
-    ) {
-      DeviceOrientationEvent.requestPermission()
-        .then((permissionState) => {
-          if (permissionState === "granted") {
-            window.addEventListener("deviceorientation", handleOrientation);
-            startSendingGyroscopeData();
-          }
-        })
-        .catch(console.error);
-    } else {
-      // For devices that don't require permission
-      window.addEventListener("deviceorientation", handleOrientation);
-      startSendingGyroscopeData();
-    }
-  }
-});
 
 // Add this function to start sending gyroscope data
 function startSendingGyroscopeData() {
   gyroscopeInterval = setInterval(() => {
+
+    let vectorX = Math.sin(gyroscopeData.beta) * Math.cos(gyroscopeData.gamma)
+    let vectorY = Math.sin(gyroscopeData.beta) * Math.cos(gyroscopeData.gamma)
+    //let vectorZ = Math.sin(gyroscopeData.beta)
+
+    vectors = {
+      "x":vectorX,
+      "y":vectorY,
+    }
+
     socket.emit("gyroscopeData", {
       roomCode: currentRoom,
-      data: gyroscopeData,
+      data: vectors,
     });
   }, 100); // Send data every 100ms
+
 }
 
 // Add this to clean up when the game ends or the user disconnects
@@ -194,23 +181,67 @@ function stopSendingGyroscopeData() {
 }
 
 // Add a handler for gyroscope data on the host side
-if (isHost) {
-  socket.on("gyroscopeUpdate", ({ playerId, data }) => {
-    updateGyroscopeDisplay(playerId, data);
-  });
-}
+socket.on("gyroscopeUpdate", ({ playerId, data }) => {
+  updateGyroscopeDisplay(playerId, data);
+
+});
 
 // Function to update the gyroscope display on the host screen
 function updateGyroscopeDisplay(playerId, data) {
   const playerElement = document.getElementById(`player-${playerId}`);
+
   if (!playerElement) {
+    const text = document.createElement("div");
+    text.id=`player-${playerId}-text`
+
     const newPlayerElement = document.createElement("div");
     newPlayerElement.id = `player-${playerId}`;
+    newPlayerElement.classList.add("garden")
+
+    const ball = document.createElement("div");
+    ball.id = `player-${playerId}-ball`;
+    ball.classList.add("ball")
+
     document.getElementById("gyroscope-data").appendChild(newPlayerElement);
+    document.getElementById(`player-${playerId}`).appendChild(ball)
+    document.getElementById(`player-${playerId}`).appendChild(text)
   }
+
+  /*updateThing(document.getElementById(`player-${playerId}`),
+      document.getElementById(`player-${playerId}-ball`),
+      data.beta,
+      data.gamma)
+
+  
+
   document.getElementById(
-    `player-${playerId}`
-  ).textContent = `Player ${playerId}: Alpha: ${data.alpha.toFixed(
-    2
-  )}, Beta: ${data.beta.toFixed(2)}, Gamma: ${data.gamma.toFixed(2)}`;
+    `player-${playerId}-text`
+  ).textContent = `Player ${playerId}:
+  Beta: ${data.beta.toFixed(2)}, Gamma: ${data.gamma.toFixed(2)}`;*/
+
 }
+
+function updateThing(garden,ball,beta,gamma) {
+  const maxX = garden.clientWidth - ball.clientWidth;
+  const maxY = garden.clientHeight - ball.clientHeight;
+
+  let x = beta; // In degree in the range [-180,180)
+  let y = gamma; // In degree in the range [-90,90)
+  
+
+  if (x > 90) {
+    x = 90;
+  }
+  if (x < -90) {
+    x = -90;
+  }
+
+  // To make computation easier we shift the range of
+  // x and y to [0,180]
+  x += 90;
+  y += 90;
+  ball.style.left = `${(maxY * y) / 180 - 10}px`; // rotating device around the y axis moves the ball horizontally
+  ball.style.top = `${(maxX * x) / 180 - 10}px`; // rotating device around the x axis moves the ball vertically
+}
+
+

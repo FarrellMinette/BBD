@@ -155,7 +155,7 @@ socket.on("receieveMap",({map,room})=>{
   });  
 })
 
-socket.on("updateBall",({playerID,data,host})=>{
+socket.on("updateBall",({data,host})=>{
   if (data===null){
     console.log("no data")
     return;
@@ -164,6 +164,8 @@ socket.on("updateBall",({playerID,data,host})=>{
     gameInProgress=true
     window.requestAnimationFrame(main)
   }
+
+  //console.log(host)
   const rotationY = Math.minmax(data.gamma, 12); // Left to right tilt
   const rotationX = Math.minmax(data.beta, 12); // Front to back tilt
   const gravity = 1;

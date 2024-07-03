@@ -157,6 +157,7 @@ socket.on("receieveMap",(maze)=>{
 
 socket.on("updateBall",({playerID,data})=>{
   if (data===null){
+    console.log("no data")
     return;
   }
   if (!gameInProgress){

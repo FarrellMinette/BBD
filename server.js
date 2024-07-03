@@ -5,8 +5,6 @@ const app = express();
 const http = require("http").createServer(app);
 const io = require("socket.io")(http);
 
-let colors = ["#red", "#green", "#blue"]
-
 app.use(express.static("public"));
 
 const rooms = new Map();

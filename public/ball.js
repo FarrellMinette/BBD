@@ -1,3 +1,5 @@
+let colors = ["red", "green", "blue"];
+
 Math.minmax = (value, limit) => {
   return Math.max(Math.min(value, limit), -limit);
 };
@@ -136,7 +138,7 @@ socket.on("receieveMap", ({ map, room }) => {
   holes.forEach(({ x, y }) => {
     const ball = document.createElement("div");
     ball.setAttribute("class", "black-hole");
-    ball.style.cssText = `left: ${x}px; top: ${y}px; `;
+    ball.style.cssText = `left: ${x}px; top: ${y}px;`;
     mazeElement.appendChild(ball);
     holeElements.push(ball);
   });
@@ -145,7 +147,7 @@ socket.on("receieveMap", ({ map, room }) => {
   balls.forEach(({ x, y }, index) => {
     const ball = document.createElement("div");
     ball.setAttribute("class", "ball");
-    ball.style.cssText = `left: ${x}px; top: ${y}px; `;
+    ball.style.cssText = `left: ${x}px; top: ${y}px; background-color: ${colors[index]}`;
     const id = room.players[index].id;
     ball.id = `ball-${id}`;
     mazeElement.appendChild(ball);
@@ -263,7 +265,9 @@ function resetGame(room) {
 
   if (ballElements.length) {
     balls.forEach(({ x, y }, index) => {
-      ballElements[index].style.cssText = `left: ${x}px; top: ${y}px; `;
+      ballElements[
+        index
+      ].style.cssText = `left: ${x}px; top: ${y}px; background-color: ${colors[index]}`;
       ballElements[index].id = `ball-${room.players[index]}`;
     });
   }
@@ -524,7 +528,7 @@ function main(timestamp) {
           if (distance <= holeSize / 2) {
             // The ball fell into a hole
             holeElements[hi].style.backgroundColor = "green";
-            alert("Game over - Won game");
+            alert(`Game over - Won game`);
             gameInProgress = false;
             resetGame();
           }
@@ -537,7 +541,9 @@ function main(timestamp) {
 
       // Move balls to their new position on the UI
       balls.forEach(({ x, y }, index) => {
-        ballElements[index].style.cssText = `left: ${x}px; top: ${y}px; `;
+        ballElements[
+          index
+        ].style.cssText = `left: ${x}px; top: ${y}px; background-color: ${colors[index]}`;
       });
     }
 

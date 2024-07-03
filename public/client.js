@@ -3,6 +3,7 @@ const socket = io();
 const mainMenu = document.getElementById("main-menu");
 const joinForm = document.getElementById("join-form");
 const lobby = document.getElementById("lobby");
+const gameStartTitle = document.getElementById("game-start-title");
 const game = document.getElementById("game");
 const createRoomBtn = document.getElementById("create-room");
 const joinRoomBtn = document.getElementById("join-room");
@@ -18,8 +19,6 @@ let currentRoom = null;
 let isHost = false;
 let gyroscopeInterval = null;
 const gyroscopeData = { alpha: 0, beta: 0, gamma: 0 };
-
-let colors = ["#FF0000", "#0000FF", "#00FF00", "#FF00FF"];
 
 let numRows = 10;
 let numCols = 10;
@@ -130,11 +129,6 @@ startGameBtn.addEventListener("click", () => {
   }
 });
 
-socket.on("receieveMap", (maze) => {
-  console.log(maze);
-  console.log("MONEY BABY");
-});
-
 socket.on("roomCreated", (roomCode) => {
   currentRoom = roomCode;
   isHost = true;
@@ -184,7 +178,10 @@ socket.on("roomFull", () => {
 
 socket.on("gameStarted", () => {
   lobby.style.display = "none";
-  game.style.display = "block";
+  gameStartTitle.style.display = "block";
+  game.style.display = "flex";
+  game.style.flexDirection = "column";
+  game.style.alignItems = "center";
 
   if (!isHost) {
     // Request permission to use the gyroscope on mobile devices
@@ -280,17 +277,7 @@ function updateGyroscopeDisplay(playerId, data, room) {
 
     const ball = document.createElement("div");
     ball.id = `player-${playerId}-ball`;
-    ball.style.backgroundColor =
-      colors[room.players.findIndex((player) => player.id === playerId)];
-    // ball.style.cssText = `background-color: ${colors[room.players.findIndex(player=> player.id === playerId)]};`;
-    // ball.style.cssText = `background-color: ${colors[room.players.findIndex(player=> player.id === playerId)]};`;
-    ball.style.color = "yellow";
-
-    console.log(
-      ball,
-      colors[room.players.findIndex((player) => player.id === playerId)]
-    );
-    // ball.classList.add("ball")
+    ball.classList.add("ball");
 
     document.getElementById("gyroscope-data").appendChild(newPlayerElement);
     document.getElementById(`player-${playerId}`).appendChild(ball);
@@ -307,7 +294,7 @@ function updateGyroscopeDisplay(playerId, data, room) {
   document.getElementById(
     `player-${playerId}-text`
   ).textContent = `Player ${playerId}:
-  Beta: ${data.beta.toFixed(2)}, Gamma: ${data.gamma.toFixed(2)}`;
+  Beta: ${data.beta}, Gamma: ${data.gamma}`;
 }
 
 function updateThing(garden, ball, beta, gamma) {

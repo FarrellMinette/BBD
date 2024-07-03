@@ -7,6 +7,12 @@ app.use(express.static("public"));
 
 const rooms = new Map();
 const MAX_PLAYERS = 4;
+let gryoscopeGlobalData = {}
+
+let resultant = {
+  gamma:0,
+  beta:0
+}
 
 io.on("connection", (socket) => {
   socket.on("createRoom", () => {
@@ -24,8 +30,9 @@ io.on("connection", (socket) => {
       } else {
         room.players.push({ id: socket.id, name });
         socket.join(roomCode);
-        socket.to(roomCode).emit("playerJoined", { name });
-        io.to(room.host).emit("updatePlayerList", room.players);
+        io.in(roomCode).emit("playerJoined", { name, room });
+        io.to(roomCode).emit("updatePlayerList", room.players);
+
         socket.emit("joinedRoom", { roomCode, isHost: false });
 
         // Check if room is full after joining
@@ -45,10 +52,36 @@ io.on("connection", (socket) => {
     }
   });
 
+  socket.on("transmitMap", ({map,roomCode}) => {
+    io.to(roomCode).emit("receieveMap",map);
+  });
+
+
   socket.on("gyroscopeData", ({ roomCode, data }) => {
+    let res = {gamma:0,beta:0}
     const room = rooms.get(roomCode);
-    if (room && room.host) {
-      io.to(room.host).emit("gyroscopeUpdate", { playerId: socket.id, data });
+
+    if (gryoscopeGlobalData[socket.id]!==undefined){
+      gryoscopeGlobalData[socket.id]=data
+
+    }else{
+      gryoscopeGlobalData[socket.id]=data
+    }
+
+    Object.keys(gryoscopeGlobalData).forEach(key => {
+      data = gryoscopeGlobalData[key]
+      res.gamma+=data.gamma;
+      res.beta+=data.beta;
+    });
+
+    if (room!==undefined){
+      res.gamma = res.gamma/room.players.length;
+      res.beta = res.beta/room.players.length;
+    }
+
+    if (room) {
+      io.to(roomCode).emit("gyroscopeUpdate", { playerId: socket.id, data });
+      io.to(roomCode).emit("updateBall",{playerID: socket.id, data:res})
     }
   });
 
@@ -69,7 +102,8 @@ function generateRoomCode() {
   return Math.random().toString(36).substring(2, 6).toUpperCase();
 }
 
-const PORT = process.env.PORT || 3000;
+const PORT = process.env.PORT || 1337;
+
 http.listen(PORT, () => {
   console.log(`Server running on port ${PORT}`);
 });

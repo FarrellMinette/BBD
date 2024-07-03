@@ -1,3 +1,5 @@
+let colors = ["red", "green", "blue"];
+
 Math.minmax = (value, limit) => {
   return Math.max(Math.min(value, limit), -limit);
 };
@@ -100,23 +102,11 @@ let balls = [];
 let ballElements = [];
 let holeElements = [];
 
-resetGame();
-
-// Draw balls for the first time
-balls.forEach(({ x, y }) => {
-  const ball = document.createElement("div");
-  ball.setAttribute("class", "ball");
-  ball.style.cssText = `left: ${x}px; top: ${y}px; `;
-
-  mazeElement.appendChild(ball);
-  ballElements.push(ball);
-});
-
 // Wall metadata
-let mapData,walls,holes;
+let mapData, walls, holes;
 
-socket.on("receieveMap",(maze)=>{
-  mazeData = maze;
+socket.on("receieveMap", ({ map, room }) => {
+  mazeData = map;
 
   walls = mazeData.map((wall) => ({
     x: wall.column * (pathW + wallW),
@@ -124,7 +114,7 @@ socket.on("receieveMap",(maze)=>{
     horizontal: wall.horizontal,
     length: wall.length * (pathW + wallW),
   }));
-  
+
   // Draw walls
   walls.forEach(({ x, y, horizontal, length }) => {
     const wall = document.createElement("div");
@@ -136,33 +126,46 @@ socket.on("receieveMap",(maze)=>{
           height: ${length}px;
           transform: rotate(${horizontal ? -90 : 0}deg);
           `;
-  
+
     mazeElement.appendChild(wall);
   });
-  
+
   holes = [{ column: numRows / 2, row: numCols / 2 }].map((hole) => ({
     x: hole.column * (wallW + pathW) + (wallW / 2 + pathW / 2),
     y: hole.row * (wallW + pathW) + (wallW / 2 + pathW / 2),
   }));
-  
+
   holes.forEach(({ x, y }) => {
     const ball = document.createElement("div");
     ball.setAttribute("class", "black-hole");
-    ball.style.cssText = `left: ${x}px; top: ${y}px; `;
-  
+    ball.style.cssText = `left: ${x}px; top: ${y}px;`;
     mazeElement.appendChild(ball);
     holeElements.push(ball);
   });
-})
 
-socket.on("updateBall",({playerID,data})=>{
-  if (data===null){
+  resetGame(room);
+  balls.forEach(({ x, y }, index) => {
+    const ball = document.createElement("div");
+    ball.setAttribute("class", "ball");
+    ball.style.cssText = `left: ${x}px; top: ${y}px; background-color: ${colors[index]}`;
+    const id = room.players[index].id;
+    ball.id = `ball-${id}`;
+    mazeElement.appendChild(ball);
+    ballElements.push(ball);
+  });
+});
+
+socket.on("updateBall", ({ data, host }) => {
+  if (data === null) {
+    console.log("no data");
     return;
   }
-  if (!gameInProgress){
-    gameInProgress=true
-    window.requestAnimationFrame(main)
+  if (!gameInProgress) {
+    gameInProgress = true;
+    window.requestAnimationFrame(main);
   }
+
+  //console.log(host)
   const rotationY = Math.minmax(data.gamma, 12); // Left to right tilt
   const rotationX = Math.minmax(data.beta, 12); // Front to back tilt
   const gravity = 1;
@@ -172,9 +175,61 @@ socket.on("updateBall",({playerID,data})=>{
   frictionX = gravity * Math.cos((rotationY / 180) * Math.PI) * friction;
   frictionY = gravity * Math.cos((rotationX / 180) * Math.PI) * friction;
 
-})
+  // if (host) {
+  mazeElement.style.cssText = `
+          transform: rotateY(${rotationY}deg) rotateX(${-rotationX}deg)
+        `;
+  // }
 
-function resetGame() {
+  const playerElement = document.getElementById(`player-res`);
+  if (!playerElement) {
+    const text = document.createElement("div");
+    text.id = "res";
+
+    const newPlayerElement = document.createElement("div");
+    newPlayerElement.id = `player-res`;
+    newPlayerElement.classList.add("garden");
+
+    const ball = document.createElement("div");
+    ball.id = `player-res-ball`;
+    ball.classList.add("ball");
+
+    document.getElementById("gyroscope-data").appendChild(newPlayerElement);
+    document.getElementById(`player-res`).appendChild(ball);
+    document.getElementById(`player-res`).appendChild(text);
+  }
+
+  updateThing(
+    document.getElementById(`player-res`),
+    document.getElementById(`player-res-ball`),
+    data.beta,
+    data.gamma
+  );
+});
+
+function updateThing(garden, ball, beta, gamma) {
+  const maxX = garden.clientWidth - ball.clientWidth;
+  const maxY = garden.clientHeight - ball.clientHeight;
+
+  let x = beta; // In degree in the range [-180,180)
+  let y = gamma; // In degree in the range [-90,90)
+
+  if (x > 90) {
+    x = 90;
+  }
+  if (x < -90) {
+    x = -90;
+  }
+
+  // To make computation easier we shift the range of
+  // x and y to [0,180]
+  x += 90;
+  y += 90;
+  ball.style.left = `${(maxY * y) / 180 - 10}px`; // rotating device around the y axis moves the ball horizontally
+  ball.style.top = `${(maxX * x) / 180 - 10}px`; // rotating device around the x axis moves the ball vertically
+}
+
+function resetGame(room) {
   previousTimestamp = undefined;
   gameInProgress = false;
   mouseStartX = undefined;
@@ -188,12 +243,20 @@ function resetGame() {
         transform: rotateY(0deg) rotateX(0deg)
       `;
 
-  balls = [
+  constantBalls = [
     { column: 0, row: 0 },
+    { column: 0, row: 9 },
     { column: 9, row: 0 },
-    { column: 0, row: 8 },
-    { column: 9, row: 8 },
-  ].map((ball) => ({
+    { column: 9, row: 9 },
+  ];
+
+  let playerBalls = [];
+
+  for (let i = 0; i < room.players.length; i++) {
+    playerBalls.push(constantBalls[i]);
+  }
+
+  balls = playerBalls.map((ball) => ({
     x: ball.column * (wallW + pathW) + (wallW / 2 + pathW / 2),
     y: ball.row * (wallW + pathW) + (wallW / 2 + pathW / 2),
     velocityX: 0,
@@ -202,15 +265,12 @@ function resetGame() {
 
   if (ballElements.length) {
     balls.forEach(({ x, y }, index) => {
-      ballElements[index].style.cssText = `left: ${x}px; top: ${y}px; `;
+      ballElements[
+        index
+      ].style.cssText = `left: ${x}px; top: ${y}px; background-color: ${colors[index]}`;
+      ballElements[index].id = `ball-${room.players[index]}`;
     });
   }
-
-  // Remove previous hole elements
-  holeElements.forEach((holeElement) => {
-    mazeElement.removeChild(holeElement);
-  });
-  holeElements = [];
 }
 
 function main(timestamp) {
@@ -468,7 +528,7 @@ function main(timestamp) {
           if (distance <= holeSize / 2) {
             // The ball fell into a hole
             holeElements[hi].style.backgroundColor = "green";
-            alert("Game over - Won game");
+            alert(`Game over - Won game`);
             gameInProgress = false;
             resetGame();
           }
@@ -481,7 +541,9 @@ function main(timestamp) {
 
       // Move balls to their new position on the UI
       balls.forEach(({ x, y }, index) => {
-        ballElements[index].style.cssText = `left: ${x}px; top: ${y}px; `;
+        ballElements[
+          index
+        ].style.cssText = `left: ${x}px; top: ${y}px; background-color: ${colors[index]}`;
       });
     }
 

@@ -3,6 +3,7 @@ const socket = io();
 const mainMenu = document.getElementById("main-menu");
 const joinForm = document.getElementById("join-form");
 const lobby = document.getElementById("lobby");
+const gameStartTitle = document.getElementById("game-start-title");
 const game = document.getElementById("game");
 const createRoomBtn = document.getElementById("create-room");
 const joinRoomBtn = document.getElementById("join-room");
@@ -18,7 +19,6 @@ let currentRoom = null;
 let isHost = false;
 let gyroscopeInterval = null;
 const gyroscopeData = { alpha: 0, beta: 0, gamma: 0 };
-
 
 let numRows = 10;
 let numCols = 10;
@@ -101,7 +101,6 @@ function generateNewMaze(rows, cols) {
   return JSON.stringify(walls, null, 2);
 }
 
-
 createRoomBtn.addEventListener("click", () => {
   socket.emit("createRoom");
 });
@@ -121,10 +120,10 @@ submitJoinBtn.addEventListener("click", () => {
 
 startGameBtn.addEventListener("click", () => {
   if (currentRoom) {
-    if (isHost){
+    if (isHost) {
       const roomCode = roomCodeDisplay.textContent.trim();
-      const map = JSON.parse(generateNewMaze(numRows, numCols))
-      socket.emit("transmitMap",{map,roomCode});
+      const map = JSON.parse(generateNewMaze(numRows, numCols));
+      socket.emit("transmitMap", { map, roomCode });
       socket.emit("startGame", currentRoom);
     }
   }
@@ -144,7 +143,7 @@ socket.on("roomCreated", (roomCode) => {
   roomStatus.textContent = "Waiting for players...";
 });
 
-socket.on("joinedRoom", ({ roomCode, isHost: hostStatus }) => {
+socket.on("joinedRoom", ({ roomCode, host: hostStatus }) => {
   currentRoom = roomCode;
   isHost = hostStatus;
   joinForm.style.display = "none";
@@ -184,7 +183,10 @@ socket.on("roomFull", () => {
 
 socket.on("gameStarted", () => {
   lobby.style.display = "none";
-  game.style.display = "block";
+  gameStartTitle.style.display = "block";
+  game.style.display = "flex";
+  game.style.flexDirection = "column";
+  game.style.alignItems = "center";
 
   if (!isHost) {
     // Request permission to use the gyroscope on mobile devices
@@ -224,7 +226,7 @@ function updatePlayerList(players) {
 
   if (players.length < 4) {
     roomStatus.textContent = `Waiting for players... (${players.length}/4)`;
-    if (isHost && players.length>=1) {
+    if (isHost && players.length >= 1) {
       startGameBtn.disabled = false;
     }
   } else {
@@ -242,15 +244,14 @@ function handleOrientation(event) {
   gyroscopeData.gamma = event.gamma; // Y-axis rotation
 }
 
-
 // Add this function to start sending gyroscope data
 function startSendingGyroscopeData() {
-  if (!isHost){
+  if (!isHost) {
     gyroscopeInterval = setInterval(() => {
-    socket.emit("gyroscopeData", {
-      roomCode: currentRoom,
-      data: gyroscopeData,
-    });
+      socket.emit("gyroscopeData", {
+        roomCode: currentRoom,
+        data: gyroscopeData,
+      });
     }, 100); // Send data every 100ms
   }
 }
@@ -265,55 +266,50 @@ function stopSendingGyroscopeData() {
 }
 
 // Add a handler for gyroscope data on the host side
-socket.on("gyroscopeUpdate", ({ playerId, data }) => {
-  if(isHost)
-  {
-    updateGyroscopeDisplay(playerId, data);
-  }
+socket.on("gyroscopeUpdate", ({ playerId, data, room }) => {
+  updateGyroscopeDisplay(playerId, data, room);
 });
 
 // Function to update the gyroscope display on the host screen
-function updateGyroscopeDisplay(playerId, data) {
+function updateGyroscopeDisplay(playerId, data, room) {
   const playerElement = document.getElementById(`player-${playerId}`);
 
   if (!playerElement) {
     const text = document.createElement("div");
-    text.id=`player-${playerId}-text`
+    text.id = `player-${playerId}-text`;
 
     const newPlayerElement = document.createElement("div");
     newPlayerElement.id = `player-${playerId}`;
-    newPlayerElement.classList.add("garden")
+    newPlayerElement.classList.add("garden");
 
     const ball = document.createElement("div");
     ball.id = `player-${playerId}-ball`;
-    ball.classList.add("ball")
+    ball.classList.add("ball");
 
     document.getElementById("gyroscope-data").appendChild(newPlayerElement);
-    document.getElementById(`player-${playerId}`).appendChild(ball)
-    document.getElementById(`player-${playerId}`).appendChild(text)
+    document.getElementById(`player-${playerId}`).appendChild(ball);
+    document.getElementById(`player-${playerId}`).appendChild(text);
   }
 
-  updateThing(document.getElementById(`player-${playerId}`),
-      document.getElementById(`player-${playerId}-ball`),
-      data.beta,
-      data.gamma)
-
-  
+  updateThing(
+    document.getElementById(`player-${playerId}`),
+    document.getElementById(`player-${playerId}-ball`),
+    data.beta,
+    data.gamma
+  );
 
   document.getElementById(
     `player-${playerId}-text`
   ).textContent = `Player ${playerId}:
-  Beta: ${data.beta.toFixed(2)}, Gamma: ${data.gamma.toFixed(2)}`;
-
+  Beta: ${data.beta}, Gamma: ${data.gamma}`;
 }
 
-function updateThing(garden,ball,beta,gamma) {
+function updateThing(garden, ball, beta, gamma) {
   const maxX = garden.clientWidth - ball.clientWidth;
   const maxY = garden.clientHeight - ball.clientHeight;
 
   let x = beta; // In degree in the range [-180,180)
   let y = gamma; // In degree in the range [-90,90)
-  
 
   if (x > 90) {
     x = 90;

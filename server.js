@@ -1,3 +1,5 @@
+"use strict";
+
 const express = require("express");
 const app = express();
 const http = require("http").createServer(app);
@@ -53,7 +55,8 @@ io.on("connection", (socket) => {
   });
 
   socket.on("transmitMap", ({map,roomCode}) => {
-    io.to(roomCode).emit("receieveMap",map);
+    const room = rooms.get(roomCode);
+    io.to(roomCode).emit("receieveMap",{map,room});
   });
 
 
@@ -68,20 +71,18 @@ io.on("connection", (socket) => {
       gryoscopeGlobalData[socket.id]=data
     }
 
-    Object.keys(gryoscopeGlobalData).forEach(key => {
-      data = gryoscopeGlobalData[key]
-      res.gamma+=data.gamma;
-      res.beta+=data.beta;
-    });
+    if (room) {
+      Object.keys(gryoscopeGlobalData).forEach(key => {
+        let data1 = gryoscopeGlobalData[key]
+        res.gamma+=data1.gamma;
+        res.beta+=data1.beta;
+      });
 
-    if (room!==undefined){
       res.gamma = res.gamma/room.players.length;
       res.beta = res.beta/room.players.length;
-    }
 
-    if (room) {
       io.to(roomCode).emit("gyroscopeUpdate", { playerId: socket.id, data });
-      io.to(roomCode).emit("updateBall",{playerID: socket.id, data:res})
+      io.to(roomCode).emit("updateBall",{playerID: socket.id, data:res,host:room.host==socket.id})
     }
   });
 

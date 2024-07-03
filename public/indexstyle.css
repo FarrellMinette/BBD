@@ -30,7 +30,7 @@ body {
     padding: 20px;
     animation: fadeIn 1s ease-in-out;
 }
-.button {
+button {
     background-color: #4CAF50;
     color: #ffffff;
     padding: 10px 20px;

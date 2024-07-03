@@ -55,7 +55,7 @@ io.on("connection", (socket) => {
   socket.on("startGame", (roomCode) => {
     const room = rooms.get(roomCode);
     if (room && room.host === socket.id) {
-      io.to(roomCode).emit("gameStarted");
+      io.to(roomCode).emit("gameStarted", { room });
     }
   });
 

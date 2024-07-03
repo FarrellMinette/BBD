@@ -176,7 +176,7 @@ socket.on("roomFull", () => {
   }
 });
 
-socket.on("gameStarted", () => {
+socket.on("gameStarted", (room) => {
   lobby.style.display = "none";
   gameStartTitle.style.display = "block";
   game.style.display = "flex";
@@ -265,6 +265,8 @@ socket.on("gyroscopeUpdate", ({ playerId, data, room }) => {
 
 // Function to update the gyroscope display on the host screen
 function updateGyroscopeDisplay(playerId, data, room) {
+  document.body.style.backgroundColor =
+    softColors[room.players.findIndex((player) => player.id === socket.id)];
   const playerElement = document.getElementById(`player-${playerId}`);
 
   if (!playerElement) {

@@ -4,7 +4,8 @@
   "description": "Building a-maze-ing games 101",
   "main": "index.js",
   "scripts": {
-    "test": "echo \"Error: no test specified\" && exit 1"
+    "test": "echo \"Error: no test specified\" && exit 1",
+    "develop": "git add . && git commit -m \"Updated\" && git push origin testing"
   },
   "author": "",
   "license": "ISC",

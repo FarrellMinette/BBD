@@ -524,7 +524,7 @@ function main(timestamp) {
           if (distance <= holeSize / 2) {
             // The ball fell into a hole
             holeElements[hi].style.backgroundColor = "green";
-            alert("Game over - Won game");
+            alert(`Game over - Won game`);
             gameInProgress = false;
             resetGame();
           }

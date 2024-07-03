@@ -3,6 +3,7 @@ const socket = io();
 const mainMenu = document.getElementById("main-menu");
 const joinForm = document.getElementById("join-form");
 const lobby = document.getElementById("lobby");
+const gameStartTitle = document.getElementById("game-start-title");
 const game = document.getElementById("game");
 const createRoomBtn = document.getElementById("create-room");
 const joinRoomBtn = document.getElementById("join-room");
@@ -185,7 +186,10 @@ socket.on("roomFull", () => {
 
 socket.on("gameStarted", () => {
   lobby.style.display = "none";
-  game.style.display = "block";
+  gameStartTitle.style.display = "block";
+  game.style.display = "flex";
+  game.style.flexDirection = "column";
+  game.style.alignItems = "center";
 
   if (!isHost) {
     // Request permission to use the gyroscope on mobile devices

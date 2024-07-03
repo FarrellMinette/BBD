@@ -5,7 +5,7 @@ const app = express();
 const http = require("http").createServer(app);
 const io = require("socket.io")(http);
 
-colors = ["#red", "#green"]
+let colors = ["#red", "#green"]
 
 app.use(express.static("public"));
 

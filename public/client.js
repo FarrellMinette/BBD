@@ -202,6 +202,17 @@ socket.on("gameStarted", (room) => {
       window.addEventListener("deviceorientation", handleOrientation);
       startSendingGyroscopeData();
     }
+
+    // Apply glow effect to player's ball
+    const playerIndex = room.players.findIndex(
+      (player) => player.id === socket.id
+    );
+    if (playerIndex !== -1) {
+      const playerBall = document.getElementById(`ball-${socket.id}`);
+      if (playerBall) {
+        playerBall.classList.add("glow-effect");
+      }
+    }
   }
 });
 
@@ -244,8 +255,9 @@ function startSendingGyroscopeData() {
       socket.emit("gyroscopeData", {
         roomCode: currentRoom,
         data: gyroscopeData,
+        isHost: isHost,
       });
-    }, 100); // Send data every 100ms
+    }, 100);
   }
 }
 

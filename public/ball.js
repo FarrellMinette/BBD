@@ -1,6 +1,8 @@
 let colors = ["red", "green", "blue", "yellow"];
 let softColors = ["#ff9b9b", "#6fc276", "#d1dff6", "#fff49b"];
 
+let playerColor;
+
 Math.minmax = (value, limit) => {
   return Math.max(Math.min(value, limit), -limit);
 };
@@ -153,6 +155,12 @@ socket.on("receieveMap", ({ map, room }) => {
     ball.id = `ball-${id}`;
     mazeElement.appendChild(ball);
     ballElements.push(ball);
+
+    // Assign player color
+    if (id === socket.id) {
+      playerColor = colors[index];
+      ball.classList.add("glow-effect");
+    }
   });
 });
 
@@ -166,9 +174,8 @@ socket.on("updateBall", ({ data, host }) => {
     window.requestAnimationFrame(main);
   }
 
-  //console.log(host)
-  const rotationY = Math.minmax(data.gamma, 12); // Left to right tilt
-  const rotationX = Math.minmax(data.beta, 12); // Front to back tilt
+  const rotationY = Math.minmax(data.gamma, 12);
+  const rotationX = Math.minmax(data.beta, 12);
   const gravity = 1;
   const friction = 0.01;
   accelerationX = gravity * Math.sin((rotationY / 180) * Math.PI);
@@ -176,10 +183,11 @@ socket.on("updateBall", ({ data, host }) => {
   frictionX = gravity * Math.cos((rotationY / 180) * Math.PI) * friction;
   frictionY = gravity * Math.cos((rotationX / 180) * Math.PI) * friction;
 
+  // Only apply tilt effect on the host's screen
   // if (host) {
   mazeElement.style.cssText = `
-          transform: rotateY(${rotationY}deg) rotateX(${-rotationX}deg)
-        `;
+      transform: rotateY(${rotationY}deg) rotateX(${-rotationX}deg)
+    `;
   // }
 
   const playerElement = document.getElementById(`player-res`);
@@ -542,9 +550,16 @@ function main(timestamp) {
 
       // Move balls to their new position on the UI
       balls.forEach(({ x, y }, index) => {
-        ballElements[
-          index
-        ].style.cssText = `left: ${x}px; top: ${y}px; background-color: ${colors[index]}`;
+        const ballElement = ballElements[index];
+        ballElement.style.left = `${x}px`;
+        ballElement.style.top = `${y}px`;
+
+        // Maintain glow effect for player's ball
+        if (colors[index] === playerColor) {
+          ballElement.classList.add("glow-effect");
+        } else {
+          ballElement.classList.remove("glow-effect");
+        }
       });
     }
 

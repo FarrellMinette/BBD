@@ -8,6 +8,11 @@ app.use(express.static("public"));
 const rooms = new Map();
 const MAX_PLAYERS = 4;
 
+let res = {
+  "x":0,
+  "y":0
+}
+
 io.on("connection", (socket) => {
   socket.on("createRoom", () => {
     const roomCode = generateRoomCode();
@@ -24,8 +29,9 @@ io.on("connection", (socket) => {
       } else {
         room.players.push({ id: socket.id, name });
         socket.join(roomCode);
-        socket.to(roomCode).emit("playerJoined", { name });
-        io.to(room.host).emit("updatePlayerList", room.players);
+        io.in(roomCode).emit("playerJoined", { name, room });
+        io.to(roomCode).emit("updatePlayerList", room.players);
+
         socket.emit("joinedRoom", { roomCode, isHost: false });
 
         // Check if room is full after joining
@@ -45,10 +51,24 @@ io.on("connection", (socket) => {
     }
   });
 
+  socket.on("transmitMap", ({map,roomCode}) => {
+    console.log("roomcode="+roomCode)
+    io.to(roomCode).emit("receieveMap",map);
+  });
+
+
   socket.on("gyroscopeData", ({ roomCode, data }) => {
     const room = rooms.get(roomCode);
-    if (room && room.host) {
-      io.to(room.host).emit("gyroscopeUpdate", { playerId: socket.id, data });
+    /*if (room && room.host) {
+      io.to(roomCode).emit("gyroscopeUpdate", { playerId: socket.id, data });
+    }*/
+
+    res.x = Math.max(res.x,data.x);
+    res.y = Math.max(res.y,data.y);
+
+    if (room) {
+      //io.to(roomCode).emit("gyroscopeUpdate", { playerId: socket.id, data });
+      io.to(roomCode).emit("updateBall",{playerID: socket.id, data:res})
     }
   });
 
@@ -69,7 +89,8 @@ function generateRoomCode() {
   return Math.random().toString(36).substring(2, 6).toUpperCase();
 }
 
-const PORT = process.env.PORT || 3000;
+const PORT = process.env.PORT || 1337;
+
 http.listen(PORT, () => {
   console.log(`Server running on port ${PORT}`);
 });

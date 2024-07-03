@@ -130,12 +130,6 @@ startGameBtn.addEventListener("click", () => {
   }
 });
 
-
-socket.on("receieveMap",(maze)=>{
-  console.log(maze)
-  console.log("MONEY BABY")
-})
-
 socket.on("roomCreated", (roomCode) => {
   currentRoom = roomCode;
   isHost = true;
@@ -288,10 +282,6 @@ function updateGyroscopeDisplay(playerId, data, room) {
 
     const ball = document.createElement("div");
     ball.id = `player-${playerId}-ball`;
-    ball.style.backgroundColor = colors[room.players.findIndex(player=> player.id === playerId)]
-
-    // items.findIndex(item => item.id === find)
-    console.log(ball, [room.players.findIndex(player=> player.id === playerId)])
     ball.classList.add("ball")
 
     document.getElementById("gyroscope-data").appendChild(newPlayerElement);
@@ -309,7 +299,7 @@ function updateGyroscopeDisplay(playerId, data, room) {
   document.getElementById(
     `player-${playerId}-text`
   ).textContent = `Player ${playerId}:
-  Beta: ${data.beta.toFixed(2)}, Gamma: ${data.gamma.toFixed(2)}`;
+  Beta: ${data.beta}, Gamma: ${data.gamma}`;
 
 }
 

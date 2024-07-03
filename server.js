@@ -5,7 +5,7 @@ const app = express();
 const http = require("http").createServer(app);
 const io = require("socket.io")(http);
 
-let colors = ["#red", "#green"]
+let colors = ["#red", "#green", "#blue"]
 
 app.use(express.static("public"));
 
@@ -32,7 +32,7 @@ io.on("connection", (socket) => {
       if (room.players.length >= MAX_PLAYERS) {
         socket.emit("error", "Room is full");
       } else {
-        room.players.push({ id: socket.id, name:name, color:colors[room.players.length] });
+        room.players.push({ id: socket.id, name:name, pid: room.players.length });
         socket.join(roomCode);
         io.in(roomCode).emit("playerJoined", { name, room });
         io.to(roomCode).emit("updatePlayerList", room.players);
@@ -84,7 +84,7 @@ io.on("connection", (socket) => {
       res.gamma = res.gamma/room.players.length;
       res.beta = res.beta/room.players.length;
 
-      io.to(roomCode).emit("gyroscopeUpdate", { playerId: socket.id, data: data});
+      io.to(roomCode).emit("gyroscopeUpdate", { playerId: socket.id, data: data, room:room});
       io.in(roomCode).emit("updateBall",{data:res,host:room.host==socket.id})
     }
   });

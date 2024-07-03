@@ -19,6 +19,7 @@ let isHost = false;
 let gyroscopeInterval = null;
 const gyroscopeData = { alpha: 0, beta: 0, gamma: 0 };
 
+let colors = ["#FF0000", "#00ff00"]
 
 let numRows = 10;
 let numCols = 10;
@@ -266,13 +267,13 @@ function stopSendingGyroscopeData() {
 }
 
 // Add a handler for gyroscope data on the host side
-socket.on("gyroscopeUpdate", ({ playerId, data }) => {
-  updateGyroscopeDisplay(playerId, data);
+socket.on("gyroscopeUpdate", ({ playerId, data, room}) => {
+  updateGyroscopeDisplay(playerId, data, room);
 
 });
 
 // Function to update the gyroscope display on the host screen
-function updateGyroscopeDisplay(playerId, data) {
+function updateGyroscopeDisplay(playerId, data, room) {
   const playerElement = document.getElementById(`player-${playerId}`);
 
   if (!playerElement) {
@@ -285,7 +286,13 @@ function updateGyroscopeDisplay(playerId, data) {
 
     const ball = document.createElement("div");
     ball.id = `player-${playerId}-ball`;
-    ball.classList.add("ball")
+    ball.style.backgroundColor = colors[room.players.findIndex(player=> player.id === playerId)]
+    // ball.style.cssText = `background-color: ${colors[room.players.findIndex(player=> player.id === playerId)]};`;
+    // ball.style.cssText = `background-color: ${colors[room.players.findIndex(player=> player.id === playerId)]};`;
+    ball.style.color = "yellow";
+
+    console.log(ball, colors[room.players.findIndex(player=> player.id === playerId)])
+    // ball.classList.add("ball")
 
     document.getElementById("gyroscope-data").appendChild(newPlayerElement);
     document.getElementById(`player-${playerId}`).appendChild(ball)

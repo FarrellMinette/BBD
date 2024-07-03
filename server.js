@@ -65,7 +65,7 @@ io.on("connection", (socket) => {
     }else{
       gryoscopeGlobalData[socket.id]=data
     }
-    
+
     let res = {gamma:0,beta:0}
     Object.keys(gryoscopeGlobalData).forEach(key => {
       data = gryoscopeGlobalData[key]
@@ -73,7 +73,11 @@ io.on("connection", (socket) => {
       res.beta+=data.beta;
     });
 
-    res = res / 4;
+    if (room!==undefined){
+      res = res / room.players.length;
+    }
+
+    //console.log(res)
 
     if (room) {
       io.to(roomCode).emit("gyroscopeUpdate", { playerId: socket.id, data });

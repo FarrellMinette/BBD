@@ -329,4 +329,3 @@ function updateThing(garden,ball,beta,gamma) {
   ball.style.left = `${(maxY * y) / 180 - 10}px`; // rotating device around the y axis moves the ball horizontally
   ball.style.top = `${(maxX * x) / 180 - 10}px`; // rotating device around the x axis moves the ball vertically
 }
-

@@ -6,24 +6,51 @@
     <title>Game Room</title>
     <script src="/socket.io/socket.io.js"></script>
     <style>
-      .garden {
-        position: relative;
-        width: 200px;
-        height: 200px;
-        border: 5px solid #ccc;
-        border-radius: 10px;
+      body {
+          display: flex;
+          flex-direction: column;
+          justify-content: center;
+          align-items: center;
+          height: 100vh;
+          margin: 0;
+          background-color: #f0f0f0;
       }
 
-      .ball {
-        position: absolute;
-        top: 90px;
-        left: 90px;
-        width: 30px;
-        height: 20px;
-        background: green;
-        border-radius: 100%;
+      #center {
+        display: flex;
+        justify-content: center;
+        text-align: center;
+        align-items: center;
       }
-    </style>
+
+      #buffer {
+        height: 10vh;
+      }
+
+      #container {
+          position: relative;
+          /* width: 30vh; */
+          height: 20vh;
+          aspect-ratio: 1/1;
+          border: 5px solid #333;
+          border-radius: 50%;
+          overflow: hidden;
+          background-color: #fff;
+      }
+
+      #ball {
+          position: absolute;
+          /* width: 5vh; */
+          height: 4vh;
+          aspect-ratio: 1/1;
+          background-color: red;
+          border-radius: 50%;
+          top: 50%;
+          left: 50%;
+          transform: translate(-50%, -50%);
+      }
+      
+  </style>
   <link rel="stylesheet" href="grid.css">  </head>
 
   <body>
@@ -59,11 +86,76 @@
           </div>
         </div>
       </div>
-      <div id="gyroscope-data"></div>
+      <!-- <div id="gyroscope-data"></div> -->
     </div>
 
+    <div id="buffer">
+      <div id="ballXCoordinate"></div>
+      <div id="ballYCoordinate"></div>
+      <div id="gyroRadius"></div>
+    </div>
+
+    <div id="container">
+      <div id="ball"></div>
+    </div>
+
+    <!-- <div id="buffer">
+      <div id="ballXCoordinate"></div>
+      <div id="ballYCoordinate"></div>
+      <div id="gyroRadius"></div>
+    </div> -->
+
+    <script>
+        const container = document.getElementById('container');
+        const ball = document.getElementById('ball');
+        const containerRadius = container.offsetWidth / 2;
+        const ballRadius = ball.offsetWidth / 2;
+        const maxOffset = containerRadius - ballRadius;
+
+        let x = 0, y = 0; // Ball's position
+        let vx = 0, vy = 0; // Ball's velocity
+
+        function handleOrientation(event) {
+            const beta = event.beta; // In degree in the range [-180,180)
+            const gamma = event.gamma; // In degree in the range [-90,90)
+
+            // Normalize the values
+            const ax = gamma / 90; // Normalize to range [-1,1]
+            const ay = beta / 90; // Normalize to range [-1,1]
+
+            // Update velocity
+            vx += ax * 0.5; // Adjust multiplier for acceleration
+            vy += ay * 0.5; // Adjust multiplier for acceleration
+        }
+
+        function updatePosition() {
+            // Update position
+            x += vx;
+            y += vy;
+
+            // Set boundaries so the ball doesn't go out of the circle
+            const distance = Math.sqrt(x * x + y * y);
+            if (distance > maxOffset) {
+                const angle = Math.atan2(y, x);
+                x = maxOffset * Math.cos(angle);
+                y = maxOffset * Math.sin(angle);
+
+                // Stop velocity on boundary hit
+                vx = 0;
+                vy = 0;
+            }
+
+            ball.style.transform = `translate(${x}px, ${y}px) translate(-50%, -50%)`;
+
+            requestAnimationFrame(updatePosition);
+        }
+
+        window.addEventListener('deviceorientation', handleOrientation);
+        requestAnimationFrame(updatePosition);
+    </script>
+
     <script src="client.js"></script>
-    <!-- <script src="ball.js" defer></script> -->
-    <script src="index.js" defer></script>
+    <script src="ball.js" defer></script>
+    <!-- <script src="tilt_game.js"></script> -->
   </body>
 </html>

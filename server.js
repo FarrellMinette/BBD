@@ -60,7 +60,10 @@ io.on("connection", (socket) => {
 
   socket.on("transmitMap", ({ map, roomCode }) => {
     const room = rooms.get(roomCode);
-    io.to(roomCode).emit("receieveMap", { map, room });
+    let column = Math.random()
+    let row = Math.random()
+    console.log(column, row)
+    io.to(roomCode).emit("receieveMap", { map, room, column, row});
   });
 
   socket.on("gyroscopeData", ({ roomCode, data }) => {

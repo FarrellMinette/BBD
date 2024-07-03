@@ -1,5 +1,6 @@
 let colors = ["red", "green", "blue", "yellow"];
 let softColors = ["#ff9b9b", "#6fc276", "#d1dff6", "#fff49b"];
+let key; 
 
 Math.minmax = (value, limit) => {
   return Math.max(Math.min(value, limit), -limit);
@@ -104,9 +105,9 @@ let ballElements = [];
 let holeElements = [];
 
 // Wall metadata
-let mapData, walls, holes;
+let mapData, walls, holes, plus_two_holes, plus_four_holes, reverse_holes, skip_holes;
 
-socket.on("receieveMap", ({ map, room }) => {
+socket.on("receieveMap", ({ map, room, column, row }) => {
   mazeData = map;
 
   walls = mazeData.map((wall) => ({
@@ -143,6 +144,59 @@ socket.on("receieveMap", ({ map, room }) => {
     mazeElement.appendChild(ball);
     holeElements.push(ball);
   });
+
+  plus_two_holes = [{ column: Math.floor(column*numCols), row: Math.floor(row*numRows) }].map((hole) => ({
+    x: hole.column * (wallW + pathW) + (wallW / 2 + pathW / 2),
+    y: hole.row * (wallW + pathW) + (wallW / 2 + pathW / 2),
+  }));
+  
+  plus_two_holes.forEach(({ x, y }) => {
+    const hole = document.createElement("div");
+    hole.setAttribute("class", "plus-two-hole");
+    hole.style.cssText = `left: ${x}px; top: ${y}px;`;
+    mazeElement.appendChild(hole);
+    holeElements.push(hole);
+  });
+
+  plus_four_holes = [{ column: Math.floor(row*numRows), row: Math.floor(column*numCols) }].map((hole) => ({
+    x: hole.column * (wallW + pathW) + (wallW / 2 + pathW / 2),
+    y: hole.row * (wallW + pathW) + (wallW / 2 + pathW / 2),
+  }));
+  
+  plus_four_holes.forEach(({ x, y }) => {
+    const hole = document.createElement("div");
+    hole.setAttribute("class", "plus-four-hole");
+    hole.style.cssText = `left: ${x}px; top: ${y}px;`;
+    mazeElement.appendChild(hole);
+    holeElements.push(hole);
+  });
+
+  reverse_holes = [{ column: Math.floor(row*numRows/2), row: Math.floor(column*numCols/2) }].map((hole) => ({
+    x: hole.column * (wallW + pathW) + (wallW / 2 + pathW / 2),
+    y: hole.row * (wallW + pathW) + (wallW / 2 + pathW / 2),
+  }));
+  
+  reverse_holes.forEach(({ x, y }) => {
+    const hole = document.createElement("div");
+    hole.setAttribute("class", "reverse-hole");
+    hole.style.cssText = `left: ${x}px; top: ${y}px;`;
+    mazeElement.appendChild(hole);
+    holeElements.push(hole);
+  });
+
+  skip_holes = [{ column: Math.floor(row*numRows*2), row: Math.floor(column*numCols*2) }].map((hole) => ({
+    x: hole.column * (wallW + pathW) + (wallW / 2 + pathW / 2),
+    y: hole.row * (wallW + pathW) + (wallW / 2 + pathW / 2),
+  }));
+  
+  skip_holes.forEach(({ x, y }) => {
+    const hole = document.createElement("div");
+    hole.setAttribute("class", "skip-hole");
+    hole.style.cssText = `left: ${x}px; top: ${y}px;`;
+    mazeElement.appendChild(hole);
+    holeElements.push(hole);
+  });
+
 
   resetGame(room);
   balls.forEach(({ x, y }, index) => {
@@ -535,6 +589,64 @@ function main(timestamp) {
           }
         });
 
+        plus_two_holes.forEach((hole, hi) => {
+          const distance = distance2D(hole, {
+            x: ball.nextX,
+            y: ball.nextY,
+          });
+  
+          if (distance <= holeSize / 2) {
+            ball.velocityX = slow(ball.velocityX, 0.5);
+            ball.velocityY = slow(ball.velocityY, 0.5);
+          }
+        });
+
+        plus_four_holes.forEach((hole, hi) => {
+          const distance = distance2D(hole, {
+            x: ball.nextX,
+            y: ball.nextY,
+          });
+  
+          if (distance <= holeSize / 2) {
+            ball.velocityX = slow(ball.velocityX, 1);
+            ball.velocityY = slow(ball.velocityY, 1);
+          }
+        });
+
+        reverse_holes.forEach((hole, hi) => {
+          const distance = distance2D(hole, {
+            x: ball.nextX,
+            y: ball.nextY,
+          });
+  
+          if (distance <= holeSize / 2) {
+            ball.velocityX = -ball.velocityX
+            ball.velocityY = -ball.velocityY
+          }
+        });
+
+        skip_holes.forEach((hole, hi) => {
+          const distance = distance2D(hole, {
+            x: ball.nextX,
+            y: ball.nextY,
+          });
+  
+          if (distance <= holeSize / 2) {
+            ball.velocityX = 0
+            ball.velocityY = 0
+          }
+        });
+
+        if (key === 'ArrowUp') {
+          ball.velocityY = Math.max(ball.velocityY - 0.25, -maxVelocity);
+        } else if (key === 'ArrowDown') {
+            ball.velocityY = Math.min(ball.velocityY + 0.25, maxVelocity);
+        } else if (key === 'ArrowLeft') {
+            ball.velocityX = Math.max(ball.velocityX - 0.25, -maxVelocity);
+        } else if (key === 'ArrowRight') {
+            ball.velocityX = Math.min(ball.velocityX + 0.25, maxVelocity);
+        }
+
         // Adjust ball metadata
         ball.x = ball.x + ball.velocityX;
         ball.y = ball.y + ball.velocityY;
@@ -555,11 +667,10 @@ function main(timestamp) {
       )
     ) {
       noteElement.innerHTML = `Congrats, you did it!
-          ${!hardMode ? "<p>Press H for hard mode</p>" : ""}
           <p>
-            Follow me
-            <a href="https://twitter.com/HunorBorbely" , target="_top"
-              >@HunorBorbely</a
+            Click link for reward:
+            <a href="https://www.youtube.com/watch?v=dQw4w9WgXcQ" , target="_top"
+              >Reward</a
             >
           </p>`;
       noteElement.style.opacity = 1;
@@ -567,12 +678,16 @@ function main(timestamp) {
     } else {
       previousTimestamp = timestamp;
       window.requestAnimationFrame(main);
+
+      window.addEventListener('keydown', (event) => {
+        key = event.key;
+    });
     }
   } catch (error) {
     if (error.message == "The ball fell into a hole") {
-      noteElement.innerHTML = `A ball fell into a black hole! Press space to reset the game.
+      noteElement.innerHTML = `A ball fell into a black hole!
           <p>
-            Back to easy? Press E
+            Whomp whomp
           </p>`;
       noteElement.style.opacity = 1;
       gameInProgress = false;

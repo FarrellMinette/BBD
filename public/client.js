@@ -128,10 +128,6 @@ startGameBtn.addEventListener("click", () => {
     }
   }
 });
-socket.on("receieveMap",(maze)=>{
-  console.log(maze)
-  console.log("MONEY BABY")
-})
 
 socket.on("roomCreated", (roomCode) => {
   currentRoom = roomCode;
@@ -328,3 +324,23 @@ function updateThing(garden, ball, beta, gamma) {
   ball.style.top = `${(maxX * x) / 180 - 10}px`; // rotating device around the x axis moves the ball vertically
 }
 
+const darkZones = [
+  { x: 50, y: 50, width: 100, height: 100 },
+  { x: 200, y: 200, width: 100, height: 100 },
+];
+
+function drawDarkZones(ctx) {
+  ctx.fillStyle = 'rgba(0, 0, 0, 0.5)'; // Semi-transparent black
+  darkZones.forEach(zone => {
+    ctx.fillRect(zone.x, zone.y, zone.width, zone.height);
+  });
+}
+
+function isInDarkZone(ball, zone) {
+  return (
+    ball.x + ball.radius > zone.x &&
+    ball.x - ball.radius < zone.x + zone.width &&
+    ball.y + ball.radius > zone.y &&
+    ball.y - ball.radius < zone.y + zone.height
+  );
+}

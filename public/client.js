@@ -19,6 +19,89 @@ let isHost = false;
 let gyroscopeInterval = null;
 const gyroscopeData = { alpha: 0, beta: 0, gamma: 0 };
 
+
+let numRows = 10;
+let numCols = 10;
+
+class Maze {
+  constructor(width, height) {
+    this.width = width;
+    this.height = height;
+    this.grid = this.createGrid();
+    this.walls = [];
+    this.generateMaze(0, 0);
+  }
+
+  createGrid() {
+    const grid = [];
+    for (let x = 0; x < this.width; x++) {
+      grid[x] = [];
+      for (let y = 0; y < this.height; y++) {
+        grid[x][y] = { visited: false, walls: [true, true, true, true] }; // top, right, bottom, left
+      }
+    }
+    return grid;
+  }
+
+  generateMaze(cx, cy) {
+    const directions = [
+      { dx: 0, dy: -1, wall: 0, opposite: 2 }, // Up
+      { dx: 1, dy: 0, wall: 1, opposite: 3 }, // Right
+      { dx: 0, dy: 1, wall: 2, opposite: 0 }, // Down
+      { dx: -1, dy: 0, wall: 3, opposite: 1 }, // Left
+    ];
+
+    this.grid[cx][cy].visited = true;
+
+    // Shuffle directions
+    for (let i = directions.length - 1; i > 0; i--) {
+      const j = Math.floor(Math.random() * (i + 1));
+      [directions[i], directions[j]] = [directions[j], directions[i]];
+    }
+
+    for (const { dx, dy, wall, opposite } of directions) {
+      const nx = cx + dx;
+      const ny = cy + dy;
+
+      if (
+        nx >= 0 &&
+        nx < this.width &&
+        ny >= 0 &&
+        ny < this.height &&
+        !this.grid[nx][ny].visited
+      ) {
+        this.grid[cx][cy].walls[wall] = false;
+        this.grid[nx][ny].walls[opposite] = false;
+        this.generateMaze(nx, ny);
+      }
+    }
+  }
+
+  getWalls() {
+    const walls = [];
+    for (let x = 0; x < this.width; x++) {
+      for (let y = 0; y < this.height; y++) {
+        if (this.grid[x][y].walls[0])
+          walls.push({ column: x, row: y, horizontal: true, length: 1 });
+        if (this.grid[x][y].walls[1])
+          walls.push({ column: x + 1, row: y, horizontal: false, length: 1 });
+        if (this.grid[x][y].walls[2])
+          walls.push({ column: x, row: y + 1, horizontal: true, length: 1 });
+        if (this.grid[x][y].walls[3])
+          walls.push({ column: x, row: y, horizontal: false, length: 1 });
+      }
+    }
+    return walls;
+  }
+}
+
+function generateNewMaze(rows, cols) {
+  const maze = new Maze(rows, cols);
+  const walls = maze.getWalls();
+  return JSON.stringify(walls, null, 2);
+}
+
+
 createRoomBtn.addEventListener("click", () => {
   socket.emit("createRoom");
 });
@@ -38,9 +121,18 @@ submitJoinBtn.addEventListener("click", () => {
 
 startGameBtn.addEventListener("click", () => {
   if (currentRoom) {
-    socket.emit("startGame", currentRoom);
+    if (isHost){
+      const roomCode = roomCodeDisplay.textContent.trim();
+      const map = JSON.parse(generateNewMaze(numRows, numCols))
+      socket.emit("transmitMap",{map,roomCode});
+      socket.emit("startGame", currentRoom);
+    }
   }
 });
+socket.on("receieveMap",(maze)=>{
+  console.log(maze)
+  console.log("MONEY BABY")
+})
 
 socket.on("roomCreated", (roomCode) => {
   currentRoom = roomCode;
@@ -63,10 +155,11 @@ socket.on("joinedRoom", ({ roomCode, isHost: hostStatus }) => {
   }
 });
 
-socket.on("playerJoined", ({ name }) => {
+socket.on("playerJoined", ({ name, room }) => {
   const li = document.createElement("li");
   li.textContent = name;
   playerList.appendChild(li);
+
 });
 
 socket.on("updatePlayerList", (players) => {
@@ -112,6 +205,8 @@ socket.on("gameStarted", () => {
       window.addEventListener("deviceorientation", handleOrientation);
       startSendingGyroscopeData();
     }
+
+
   }
 });
 
@@ -129,8 +224,8 @@ function updatePlayerList(players) {
 
   if (players.length < 4) {
     roomStatus.textContent = `Waiting for players... (${players.length}/4)`;
-    if (isHost) {
-      startGameBtn.disabled = true;
+    if (isHost && players.length>=1) {
+      startGameBtn.disabled = false;
     }
   } else {
     roomStatus.textContent = "Room is full. Ready to start!";
@@ -147,41 +242,17 @@ function handleOrientation(event) {
   gyroscopeData.gamma = event.gamma; // Y-axis rotation
 }
 
-// Modify the existing socket.on('gameStarted') handler
-socket.on("gameStarted", () => {
-  lobby.style.display = "none";
-  game.style.display = "block";
-
-  if (!isHost) {
-    // Request permission to use the gyroscope on mobile devices
-    if (
-      typeof DeviceOrientationEvent !== "undefined" &&
-      typeof DeviceOrientationEvent.requestPermission === "function"
-    ) {
-      DeviceOrientationEvent.requestPermission()
-        .then((permissionState) => {
-          if (permissionState === "granted") {
-            window.addEventListener("deviceorientation", handleOrientation);
-            startSendingGyroscopeData();
-          }
-        })
-        .catch(console.error);
-    } else {
-      // For devices that don't require permission
-      window.addEventListener("deviceorientation", handleOrientation);
-      startSendingGyroscopeData();
-    }
-  }
-});
 
 // Add this function to start sending gyroscope data
 function startSendingGyroscopeData() {
-  gyroscopeInterval = setInterval(() => {
+  if (!isHost){
+    gyroscopeInterval = setInterval(() => {
     socket.emit("gyroscopeData", {
       roomCode: currentRoom,
       data: gyroscopeData,
     });
-  }, 100); // Send data every 100ms
+    }, 100); // Send data every 100ms
+  }
 }
 
 // Add this to clean up when the game ends or the user disconnects
@@ -194,23 +265,68 @@ function stopSendingGyroscopeData() {
 }
 
 // Add a handler for gyroscope data on the host side
-if (isHost) {
-  socket.on("gyroscopeUpdate", ({ playerId, data }) => {
+socket.on("gyroscopeUpdate", ({ playerId, data }) => {
+  if(isHost)
+  {
     updateGyroscopeDisplay(playerId, data);
-  });
-}
+  }
+});
 
 // Function to update the gyroscope display on the host screen
 function updateGyroscopeDisplay(playerId, data) {
   const playerElement = document.getElementById(`player-${playerId}`);
+
   if (!playerElement) {
+    const text = document.createElement("div");
+    text.id=`player-${playerId}-text`
+
     const newPlayerElement = document.createElement("div");
     newPlayerElement.id = `player-${playerId}`;
+    newPlayerElement.classList.add("garden")
+
+    const ball = document.createElement("div");
+    ball.id = `player-${playerId}-ball`;
+    ball.classList.add("ball")
+
     document.getElementById("gyroscope-data").appendChild(newPlayerElement);
+    document.getElementById(`player-${playerId}`).appendChild(ball)
+    document.getElementById(`player-${playerId}`).appendChild(text)
   }
+
+  updateThing(document.getElementById(`player-${playerId}`),
+      document.getElementById(`player-${playerId}-ball`),
+      data.beta,
+      data.gamma)
+
+  
+
   document.getElementById(
-    `player-${playerId}`
-  ).textContent = `Player ${playerId}: Alpha: ${data.alpha.toFixed(
-    2
-  )}, Beta: ${data.beta.toFixed(2)}, Gamma: ${data.gamma.toFixed(2)}`;
+    `player-${playerId}-text`
+  ).textContent = `Player ${playerId}:
+  Beta: ${data.beta.toFixed(2)}, Gamma: ${data.gamma.toFixed(2)}`;
+
 }
+
+function updateThing(garden,ball,beta,gamma) {
+  const maxX = garden.clientWidth - ball.clientWidth;
+  const maxY = garden.clientHeight - ball.clientHeight;
+
+  let x = beta; // In degree in the range [-180,180)
+  let y = gamma; // In degree in the range [-90,90)
+  
+
+  if (x > 90) {
+    x = 90;
+  }
+  if (x < -90) {
+    x = -90;
+  }
+
+  // To make computation easier we shift the range of
+  // x and y to [0,180]
+  x += 90;
+  y += 90;
+  ball.style.left = `${(maxY * y) / 180 - 10}px`; // rotating device around the y axis moves the ball horizontally
+  ball.style.top = `${(maxX * x) / 180 - 10}px`; // rotating device around the x axis moves the ball vertically
+}
+

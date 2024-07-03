@@ -10,6 +10,7 @@ class Maze {
       this.cols = columns;
       this.grid = [];
       this.stack = [];
+      this.cellCenters = [];
     }
   
     setup() {
@@ -26,6 +27,9 @@ class Maze {
             c
           );
           row.push(cell);
+          const centerX = cell.colNum * cell.width + cell.width / 2;
+          const centerY = cell.rowNum * cell.height + cell.height / 2;
+          this.cellCenters.push({ball: false, x: centerX, y: centerY });
         }
         this.grid.push(row);
       }
@@ -123,6 +127,7 @@ class Cell {
       ctx.moveTo(fromX, fromY);
       ctx.lineTo(toX, toY);
       ctx.stroke();
+      // ctx.endPath();
   }
 
   removeWalls(cell1, cell2) {
@@ -188,68 +193,101 @@ class Cell {
         this.width - 2,
         this.height - 2
       );
+
   }
 }
   
 class Ball {
-  constructor(ballElement, dx, dy, ax, ay) {
+  constructor(ballElement, dx, dy, ax, ay, ballRadius) {
     this.ballElement = ballElement
     this.dx = dx;
     this.dy = dy;
     this.ax = ax;
     this.ay = ay;
-    this.x = 15
-    this.y = 15
-    this.ballRadius = 20
+    this.x = ballElement.offsetLeft
+    this.y = ballElement.offsetTop
+    this.ballRadius = ballRadius
+    // this.x = 515
+    // this.y = 515
+    // this.ballRadius = 20
   }
 
   update() {
     this.ballElement.style.left = this.x + "px";
     this.ballElement.style.top = this.y + "px";
 
-    if (rightPressed==true || leftPressed==true || upPressed==true || downPressed == true) {
-      let num = 15
-      let colors = ctx.getImageData(this.x, this.y, num, num).data
-      let col_sum = 0 
-      for (let i=0; i<num**2; i++) {
-        col_sum += colors[0+i*4]+colors[1+i*4]+colors[2+4*i];
-      }
-      if (col_sum < 50) {
-        if ((rightPressed==true)) {
-          colors = ctx.getImageData(this.x + this.ballRadius, this.y, 1, 1).data
-          if (colors[0]+colors[1]+colors[2]<50) this.x = this.x + this.dx 
+    const cell = getClosestCell(this.x, this.y, maze.cellCenters)
+    console.log(cell)
+
+    // if (rightPressed==true || leftPressed==true || upPressed==true || downPressed == true) {
+    //   let num = 5
+    //   let colors = ctx.getImageData(this.x, this.y, num, num).data
+
+    //   let col_sum = 0 
+    //   for (let i=0; i<num**2; i++) {
+    //     col_sum += colors[0+i*4]+colors[1+i*4]+colors[2+4*i];
+    //   }
+    //   console.log(colors, col_sum)
+
+    //   if (col_sum < 500) {
+    //     if ((rightPressed===true)) {
+    //       console.log(this.x, this.x + 0.5*this.ballRadius)
+    //       colors = ctx.getImageData(this.x + 0.5*this.ballRadius, this.y, 1, 1).data
+    //       if (colors[0]+colors[1]+colors[2]<500) this.x = this.x + this.dx 
+    //     }
+    //     else if (leftPressed===true) {
+    //       colors = ctx.getImageData(this.x - 0.5*this.ballRadius, this.y, 1, 1).data
+    //       if (colors[0]+colors[1]+colors[2]<500) this.x = this.x - this.dx
+    //     }
+    //     else if (upPressed===true) {
+    //       colors = ctx.getImageData(this.x, this.y - 0.5*this.ballRadius, 1, 1).data
+    //       if (colors[0]+colors[1]+colors[2]<500) this.y = this.y - this.dy 
+    //     }
+    //     else if (downPressed===true){
+    //       colors = ctx.getImageData(this.x, this.y + 0.5*this.ballRadius, 1, 1).data
+    //       if (colors[0]+colors[1]+colors[2]<500) this.y = this.y + this.dy
+    //     }
+    //   }
+    //   else { 
+        if ((rightPressed===true)) {
+          this.x = this.x + this.dx 
+          console.log("right")
         }
-        else if (leftPressed==true) {
-          colors = ctx.getImageData(this.x - 0.6*this.ballRadius, this.y, 1, 1).data
-          if (colors[0]+colors[1]+colors[2]<50) this.x = this.x - this.dx
+        else if (leftPressed===true) {
+          this.x = this.x - this.dx
+          console.log("left")
         }
-        else if (upPressed==true) {
-          colors = ctx.getImageData(this.x, this.y - 0.8*this.ballRadius, 1, 1).data
-          if (colors[0]+colors[1]+colors[2]<50) this.y = this.y - this.dy 
+        else if (upPressed===true) {
+          this.y = this.y - this.dy 
+          console.log("up")
         }
-        else if (downPressed==true){
-          colors = ctx.getImageData(this.x, this.y + this.ballRadius, 1, 1).data
-          if (colors[0]+colors[1]+colors[2]<50) this.y = this.y + this.dy
-        }
-      }
-      else { 
-        console.log(col_sum)
-        if ((rightPressed==true)) {
-          this.x = this.x - 1*this.dx 
-        }
-        else if (leftPressed==true) {
-          this.x = this.x + 1*this.dx
-        }
-        else if (upPressed==true) {
-          this.y = this.y + 1*this.dy 
-        }
-        else if (downPressed==true){
-          this.y = this.y - 1*this.dy
+        else if (downPressed===true){
+          this.y = this.y + this.dy
+          console.log("down")
         }
 
-      }
+    //   }
+    // }
+  }
+}
+
+function getClosestCell(ballX, ballY, cellCenter) {
+  let closestCell = null;
+  let minDistance = Infinity; 
+  let cellNum = 0
+
+  for (let i = 0; i < cellCenter.length; i++) {
+    const cell = cellCenter[i];
+    console.log(cellCenter[i].x, ballX)
+    const distance = Math.sqrt(Math.pow(ballX - cellCenter[i].x, 2) + Math.pow(ballY - cellCenter[i].y, 2));
+
+    if (distance < minDistance) {
+      minDistance = distance;
+      closestCell = cell;
+      cellNum = i
     }
   }
+  return {closestCell, cellNum}
 }
 
 function draw() {
@@ -257,8 +295,6 @@ function draw() {
     ball.update();
   }
 
-function draw_nothing() {}
-  
 function keyDownHandler(event) {
   if (event.key === "Right" || event.key === "ArrowRight") {
     rightPressed = true;
@@ -283,22 +319,24 @@ function keyUpHandler(event) {
   }
 }
 
-// Set dimensions to fit a mobile phone screen (16:9 ratio)
-let screenWidth = window.innerWidth;
-let screenHeight = window.innerHeight;
-let mazeWidth = screenWidth-5;
-let mazeHeight = screenHeight-5;
+let screenWidth = window.screen.height;
+let screenHeight = window.screen.width;
+let mazeWidth = 0.6*screenWidth;
+let mazeHeight = 0.6*screenHeight;
 
-// Set number of rows and columns
-let rows = 16; // This can be adjusted based on desired cell size
-let cols = 32; // This can be adjusted based on desired cell size
+let rows = 11; 
+let cols = 11; 
 
-let maze = new Maze(mazeWidth, mazeHeight, rows, cols);
+let maze = new Maze(mazeWidth, mazeWidth, rows, cols);
 maze.setup();
 maze.generateMaze();
+console.log(maze.cellCenters, maze.cellCenters[0].y)
 
+let ballRadius = 0.5*(mazeWidth/rows)
 let ballElement = document.getElementById("ball");
-let ball = new Ball(ballElement, 2, 2, 0, 0);
+ballElement.style.height = ballRadius+"px"
+ballElement.style.width = ballRadius+"px"
+let ball = new Ball(ballElement, 2, 2, 0, 0, ballRadius);
 
 let rightPressed = false;
 let leftPressed = false;
@@ -307,4 +345,4 @@ let downPressed = false;
 
 document.addEventListener("keydown", keyDownHandler, false);
 document.addEventListener("keyup", keyUpHandler, false);
-setInterval(draw, 10);
+setInterval(draw, 50);

@@ -12,27 +12,25 @@
         display: flex;
         justify-content: center;
         align-items: center;
-        background-color: #f0f0f0;
+        background-color: #666666;
       }
 
       canvas {
-        border: 1px solid #000;
+        border: 5px solid #ffffff;
+        justify-content: center;
+        align-items: center;
       }
 
       #ball {
         position: absolute;
-        top: 400;
-        left: 450;
-        width: 15px;
-        height: 15px;
-        background: rgb(0, 55, 128);
+        background: rgb(239, 255, 19);
         border-radius: 100%;
       }
 
     </style>
   </head>
   <body>
-    <canvas id="myCanvas" width="480" height="320"></canvas>
+    <canvas id="myCanvas"></canvas>
     <div id="ball"></div>
     <script src="maze_runner.js" type="module" defer></script>
   </body>

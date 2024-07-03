@@ -20,8 +20,6 @@ let isHost = false;
 let gyroscopeInterval = null;
 const gyroscopeData = { alpha: 0, beta: 0, gamma: 0 };
 
-let colors = ["#FF0000", "#00ff00"]
-
 let numRows = 10;
 let numCols = 10;
 
@@ -291,12 +289,10 @@ function updateGyroscopeDisplay(playerId, data, room) {
     const ball = document.createElement("div");
     ball.id = `player-${playerId}-ball`;
     ball.style.backgroundColor = colors[room.players.findIndex(player=> player.id === playerId)]
-    // ball.style.cssText = `background-color: ${colors[room.players.findIndex(player=> player.id === playerId)]};`;
-    // ball.style.cssText = `background-color: ${colors[room.players.findIndex(player=> player.id === playerId)]};`;
-    ball.style.color = "yellow";
 
-    console.log(ball, colors[room.players.findIndex(player=> player.id === playerId)])
-    // ball.classList.add("ball")
+    // items.findIndex(item => item.id === find)
+    console.log(ball, [room.players.findIndex(player=> player.id === playerId)])
+    ball.classList.add("ball")
 
     document.getElementById("gyroscope-data").appendChild(newPlayerElement);
     document.getElementById(`player-${playerId}`).appendChild(ball)

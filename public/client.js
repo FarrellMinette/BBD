@@ -268,8 +268,7 @@ socket.on("gyroscopeUpdate", ({ playerId, data, room }) => {
 
 // Function to update the gyroscope display on the host screen
 function updateGyroscopeDisplay(playerId, data, room) {
-  document.body.style.backgroundColor =
-    softColors[room.players.findIndex((player) => player.id === socket.id)];
+  document.body.style.setProperty('background', softColors[room.players.findIndex((player) => player.id === socket.id)], 'important');
   const playerElement = document.getElementById(`player-${playerId}`);
 
   if (!playerElement) {

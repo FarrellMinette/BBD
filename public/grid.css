@@ -6,8 +6,8 @@ body {
     --end-color: #7d82b8;
     --text-color: #210124;
   
-    font-family: "Segoe UI", Tahoma, Geneva, Verdana, sans-serif;
-    background: linear-gradient(to right, red, yellow, green, blue);
+    /* font-family: "Segoe UI", Tahoma, Geneva, Verdana, sans-serif; */
+    /* background: linear-gradient(to right, red, yellow, green, blue); */
   }
   
   html,

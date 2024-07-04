@@ -1,6 +1,6 @@
 body {
     /* background-color: #f0f0f0; */
-    font-family: Arial, sans-serif;
+    /* font-family: Arial, sans-serif; */
     text-align: center;
     width: auto; 
 }
@@ -29,6 +29,13 @@ body {
     align-items: center;
     padding: 20px;
     animation: fadeIn 1s ease-in-out;
+}
+input {
+    border-radius: 15px; /* Adjust the value to round the corners more or less */
+    background-color: #f0f0f0; /* Set the desired background color */
+    border: 1px solid #ccc; /* Optional: Set a border */
+    padding: 10px; /* Optional: Add some padding */
+    font-size: 16px; /* Optional: Set the font size */
 }
 button {
     background-color: #4CAF50;

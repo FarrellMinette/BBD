@@ -91,6 +91,14 @@ let balls = [];
 let ballElements = [];
 let holeElements = [];
 
+socket_to_ball_name = {};
+socket_to_ball_id = {};
+let currRoom;
+let currID;
+let numTimesErrorPlayed = 0;
+
+let winner;
+
 // Wall metadata
 let mapData,
   walls,
@@ -100,8 +108,10 @@ let mapData,
   reverse_holes,
   skip_holes;
 
-socket.on("receieveMap", ({ map, room, column, row }) => {
+socket.on("receieveMap", ({ map, room, column, row, roomCode }) => {
   mazeData = map;
+  currRoom = roomCode;
+  currID = socket.id;
 
   walls = mazeData.map((wall) => ({
     x: wall.column * (pathW + wallW),
@@ -213,6 +223,11 @@ socket.on("receieveMap", ({ map, room, column, row }) => {
     ball.id = `ball-${id}`;
     mazeElement.appendChild(ball);
     ballElements.push(ball);
+
+    const name = room.players[index].name;
+
+    socket_to_ball_name[index] = name;
+    socket_to_ball_id[index] = id;
   });
 });
 
@@ -352,6 +367,7 @@ function main(timestamp) {
   const timeElapsed = (timestamp - previousTimestamp) / 16;
 
   try {
+    index = 0;
     // If mouse didn't move yet don't do anything
     if (accelerationX != undefined && accelerationY != undefined) {
       const velocityChangeX = accelerationX * timeElapsed;
@@ -589,9 +605,13 @@ function main(timestamp) {
           if (distance <= holeSize / 2) {
             // The ball fell into a hole
             holeElements[hi].style.backgroundColor = "green";
-            alert(`Game over - Won game`);
+            document.getElementById("game-start-title").textContent =
+              "Winner:" + socket_to_ball_name[index];
+
+            const id = socket_to_ball_id[index];
+            winner = id;
             gameInProgress = false;
-            resetGame();
+            throw Error("Game over");
           }
         });
 
@@ -664,31 +684,42 @@ function main(timestamp) {
           index
         ].style.cssText = `left: ${x}px; top: ${y}px; background-color: ${colors[index]}`;
       });
-    }
 
-    // Win detection
-    if (
-      balls.every(
-        (ball) => distance2D(ball, { x: 350 / 2, y: 315 / 2 }) < 65 / 2
-      )
-    ) {
-      gameInProgress = false;
-    } else {
+      index++;
       previousTimestamp = timestamp;
       window.requestAnimationFrame(main);
-
-      window.addEventListener("keydown", (event) => {
-        key = event.key;
-      });
     }
   } catch (error) {
-    if (error.message == "The ball fell into a hole") {
-      noteElement.innerHTML = `A ball fell into a black hole!
-          <p>
-            Whomp whomp
-          </p>`;
-      noteElement.style.opacity = 1;
-      gameInProgress = false;
+    if (error.message == "Game over") {
+      if (winner !== currID && numTimesErrorPlayed == 0) {
+        var audio = new Audio("audio/downer_noise.mp3");
+        audio.play();
+        numTimesErrorPlayed += 1;
+
+        confetti({
+          particleCount: 100,
+          spread: 120,
+          origin: { y: 0.6, x: 0.2 },
+        });
+
+        confetti({
+          particleCount: 100,
+          spread: 120,
+          origin: { y: 0.4, x: 0.4 },
+        });
+
+        confetti({
+          particleCount: 100,
+          spread: 120,
+          origin: { y: 0.6, x: 0.7 },
+        });
+
+        confetti({
+          particleCount: 100,
+          spread: 120,
+          origin: { y: 0.9, x: 0.5 },
+        });
+      }
     } else throw error;
   }
 }

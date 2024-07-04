@@ -156,9 +156,9 @@ body {
     border-radius: 50%;
     border-radius: 50%;
     background-color: #f06449;
-    border: 2px solid rgba(255, 255, 255, 0.25);
-    width: 10px;
-    height: 10px;
+    border: 1px solid rgba(255, 255, 255, 0.25);
+    width: 9px;
+    height: 9px;
   }
   
   .wall {
@@ -207,8 +207,8 @@ body {
 
   .plus-two-hole {
     position: absolute;
-    width: 18px;
-    height: 18px;
+    width: 15px;
+    height: 15px;
     border-radius: 20%;
     background-image: url('images/plus_two.png');
     background-size: cover; /* Adjust as needed */
@@ -219,8 +219,8 @@ body {
 
   .plus-four-hole {
     position: absolute;
-    width: 18px;
-    height: 18px;
+    width: 15px;
+    height: 15px;
     border-radius: 20%;
     background-image: url('images/plus_four.png');
     background-size: cover; /* Adjust as needed */
@@ -231,8 +231,8 @@ body {
 
   .reverse-hole {
     position: absolute;
-    width: 18px;
-    height: 18px;
+    width: 10px;
+    height: 10px;
     border-radius: 20%;
     background-image: url('images/reverse.png');
     background-size: cover; /* Adjust as needed */
@@ -243,8 +243,8 @@ body {
   
   .skip-hole {
     position: absolute;
-    width: 18px;
-    height: 18px;
+    width: 15px;
+    height: 15px;
     border-radius: 20%;
     background-image: url('images/skip.png');
     background-size: cover; /* Adjust as needed */

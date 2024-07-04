@@ -29,32 +29,19 @@ const closestItCanBe = (cap, ball) => {
 
 // Roll the ball around the wall cap
 const rollAroundCap = (cap, ball) => {
-  // The direction the ball can't move any further because the wall holds it back
   let impactAngle = getAngle(ball, cap);
-
-  // The direction the ball wants to move based on it's velocity
   let heading = getAngle(
     { x: 0, y: 0 },
     { x: ball.velocityX, y: ball.velocityY }
   );
-
-  // The angle between the impact direction and the ball's desired direction
-  // The smaller this angle is, the bigger the impact
-  // The closer it is to 90 degrees the smoother it gets (at 90 there would be no collision)
   let impactHeadingAngle = impactAngle - heading;
-
-  // Velocity distance if not hit would have occurred
   const velocityMagnitude = distance2D(
     { x: 0, y: 0 },
     { x: ball.velocityX, y: ball.velocityY }
   );
-  // Velocity component diagonal to the impact
   const velocityMagnitudeDiagonalToTheImpact =
     Math.sin(impactHeadingAngle) * velocityMagnitude;
-
-  // How far should the ball be from the wall cap
   const closestDistance = wallW / 2 + ballSize / 2;
-
   const rotationAngle = Math.atan(
     velocityMagnitudeDiagonalToTheImpact / closestDistance
   );
@@ -171,7 +158,7 @@ socket.on("receieveMap", ({ map, room, column, row }) => {
     holeElements.push(hole);
   });
 
-  reverse_holes = [{ column: Math.floor(row*numRows/2), row: Math.floor(column*numCols/2) }].map((hole) => ({
+  reverse_holes = [{ column: Math.floor(row*numRows/2), row: Math.floor(column*numCols/3) }].map((hole) => ({
     x: hole.column * (wallW + pathW) + (wallW / 2 + pathW / 2),
     y: hole.row * (wallW + pathW) + (wallW / 2 + pathW / 2),
   }));
@@ -184,7 +171,7 @@ socket.on("receieveMap", ({ map, room, column, row }) => {
     holeElements.push(hole);
   });
 
-  skip_holes = [{ column: Math.floor(row*numRows*2), row: Math.floor(column*numCols*2) }].map((hole) => ({
+  skip_holes = [{ column: Math.floor(row*numRows/3), row: Math.floor(column*numCols/2) }].map((hole) => ({
     x: hole.column * (wallW + pathW) + (wallW / 2 + pathW / 2),
     y: hole.row * (wallW + pathW) + (wallW / 2 + pathW / 2),
   }));
@@ -194,7 +181,7 @@ socket.on("receieveMap", ({ map, room, column, row }) => {
     hole.setAttribute("class", "skip-hole");
     hole.style.cssText = `left: ${x}px; top: ${y}px;`;
     mazeElement.appendChild(hole);
-    holeElements.push(hole);
+    holeElements.push(hole);  
   });
 
 
@@ -596,8 +583,8 @@ function main(timestamp) {
           });
   
           if (distance <= holeSize / 2) {
-            ball.velocityX = slow(ball.velocityX, 0.5);
-            ball.velocityY = slow(ball.velocityY, 0.5);
+            ball.velocityX = slow(ball.velocityX, 0.25);
+            ball.velocityY = slow(ball.velocityY, 0.25);
           }
         });
 
@@ -620,8 +607,9 @@ function main(timestamp) {
           });
   
           if (distance <= holeSize / 2) {
-            ball.velocityX = -ball.velocityX
-            ball.velocityY = -ball.velocityY
+            ball.velocityX = -1.5*ball.velocityX
+            ball.velocityY = -1.5*ball.velocityY
+
           }
         });
 
@@ -647,10 +635,27 @@ function main(timestamp) {
             ball.velocityX = Math.min(ball.velocityX + 0.25, maxVelocity);
         }
 
+
+
         // Adjust ball metadata
         ball.x = ball.x + ball.velocityX;
         ball.y = ball.y + ball.velocityY;
       });
+
+      balls.forEach((ball1, index) => {
+        for (let j = index + 1; j < balls.length; j++) {
+          const ball2 = balls[j];
+          const distance = distance2D({ x: ball1.x, y: ball1.y }, { x: ball2.x, y: ball2.y });
+    
+          if (distance < ballSize) {
+            ball1.velocityX = -ball1.velocityX;
+            ball1.velocityY = -ball1.velocityY;
+            ball2.velocityX = -ball2.velocityX;
+            ball2.velocityY = -ball2.velocityY;
+          }
+        }
+      });
+    
 
       // Move balls to their new position on the UI
       balls.forEach(({ x, y }, index) => {
@@ -666,14 +671,6 @@ function main(timestamp) {
         (ball) => distance2D(ball, { x: 350 / 2, y: 315 / 2 }) < 65 / 2
       )
     ) {
-      noteElement.innerHTML = `Congrats, you did it!
-          <p>
-            Click link for reward:
-            <a href="https://www.youtube.com/watch?v=dQw4w9WgXcQ" , target="_top"
-              >Reward</a
-            >
-          </p>`;
-      noteElement.style.opacity = 1;
       gameInProgress = false;
     } else {
       previousTimestamp = timestamp;

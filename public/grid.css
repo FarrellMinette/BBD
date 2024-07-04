@@ -1,6 +1,5 @@
 body {
     /* https://coolors.co/f06449-ede6e3-7d82b8-36382e-613f75  */
-    --background-color: #ede6e3;
     --wall-color: #36382e;
     --joystick-color: #210124;
     --joystick-head-color: #f06449;
@@ -8,7 +7,7 @@ body {
     --text-color: #210124;
   
     font-family: "Segoe UI", Tahoma, Geneva, Verdana, sans-serif;
-    background-color: var(--background-color);
+    background: linear-gradient(to right, red, yellow, green, blue);
   }
   
   html,
@@ -37,10 +36,11 @@ body {
     grid-row: 1 / -1;
     grid-column: 1;
     width: 350px;
-    height: 315px;
+    height: 350px;
     display: flex;
     justify-content: center;
     align-items: center;
+    background-color: white;
   }
   
   #end {
@@ -166,7 +166,7 @@ body {
     transform-origin: top center;
     margin-left: -5px;
     position: absolute;
-    background-color: #fff;
+    background-color: #000000;
     border: 2px solid #75757556;
     border-radius: 2px;
     display: flex;

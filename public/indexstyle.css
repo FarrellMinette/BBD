@@ -1,5 +1,5 @@
 body {
-    background-color: #f0f0f0;
+    /* background-color: #f0f0f0; */
     font-family: Arial, sans-serif;
     text-align: center;
     width: auto; 
@@ -46,6 +46,8 @@ button {
     height: 200px;
     margin: 20px;
     border-radius: 50%;
+    position: relative;
+    align-items: center;
 }
 
 .features-testimonials {

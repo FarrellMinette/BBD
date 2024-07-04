@@ -162,7 +162,6 @@ socket.on("playerJoined", ({ name, room }) => {
   const li = document.createElement("li");
   li.textContent = name;
   playerList.appendChild(li);
-
 });
 
 socket.on("updatePlayerList", (players) => {
@@ -351,8 +350,8 @@ const darkZones = [
 ];
 
 function drawDarkZones(ctx) {
-  ctx.fillStyle = 'rgba(0, 0, 0, 0.5)'; // Semi-transparent black
-  darkZones.forEach(zone => {
+  ctx.fillStyle = "rgba(0, 0, 0, 0.5)"; // Semi-transparent black
+  darkZones.forEach((zone) => {
     ctx.fillRect(zone.x, zone.y, zone.width, zone.height);
   });
 }

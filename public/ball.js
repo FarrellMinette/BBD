@@ -634,28 +634,11 @@ function main(timestamp) {
         } else if (key === 'ArrowRight') {
             ball.velocityX = Math.min(ball.velocityX + 0.25, maxVelocity);
         }
-
-
-
+        
         // Adjust ball metadata
         ball.x = ball.x + ball.velocityX;
         ball.y = ball.y + ball.velocityY;
-      });
-
-      balls.forEach((ball1, index) => {
-        for (let j = index + 1; j < balls.length; j++) {
-          const ball2 = balls[j];
-          const distance = distance2D({ x: ball1.x, y: ball1.y }, { x: ball2.x, y: ball2.y });
-    
-          if (distance < ballSize) {
-            ball1.velocityX = -ball1.velocityX;
-            ball1.velocityY = -ball1.velocityY;
-            ball2.velocityX = -ball2.velocityX;
-            ball2.velocityY = -ball2.velocityY;
-          }
-        }
-      });
-    
+      });    
 
       // Move balls to their new position on the UI
       balls.forEach(({ x, y }, index) => {

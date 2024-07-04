@@ -14,11 +14,14 @@ const roomCodeInput = document.getElementById("room-code");
 const roomCodeDisplay = document.getElementById("room-code-display");
 const playerList = document.getElementById("player-list");
 const roomStatus = document.getElementById("room-status");
+const lobbyTitle = document.getElementById("lobby-title");
+const gyroContainer = document.getElementById("container");
 
 let currentRoom = null;
 let isHost = false;
 let gyroscopeInterval = null;
 const gyroscopeData = { alpha: 0, beta: 0, gamma: 0 };
+let globalMaze;
 
 let numRows = 10;
 let numCols = 10;
@@ -118,7 +121,7 @@ submitJoinBtn.addEventListener("click", () => {
   }
 });
 
-startGameBtn.addEventListener("click", () => {
+startGameBtn.addEventListener("click", (players) => {
   if (currentRoom) {
     if (isHost) {
       const roomCode = roomCodeDisplay.textContent.trim();
@@ -128,6 +131,11 @@ startGameBtn.addEventListener("click", () => {
     }
   }
 });
+socket.on("receieveMap",(maze)=>{
+  console.log(maze)
+  globalMaze = maze;
+  console.log("MONEY BABY")
+})
 
 socket.on("roomCreated", (roomCode) => {
   currentRoom = roomCode;
@@ -154,7 +162,6 @@ socket.on("playerJoined", ({ name, room }) => {
   const li = document.createElement("li");
   li.textContent = name;
   playerList.appendChild(li);
-
 });
 
 socket.on("updatePlayerList", (players) => {
@@ -203,9 +210,22 @@ socket.on("gameStarted", (room) => {
       window.addEventListener("deviceorientation", handleOrientation);
       startSendingGyroscopeData();
     }
-
-
+  } else {
+    gyroContainer.style.display = "none";
+    playerList.style.display = "block";
+    lobbyTitle.style.display = "none";
+    roomStatus.style.display = "none";
+    startGameBtn.style.display = "none";
+    lobby.style.display = "block";
+    playerList.innerHTML = "";
+    globalMaze.room.players.forEach((player) => {
+      const li = document.createElement("li");
+      li.textContent = player.name;
+      li.style.color = colors[player.pid];
+      playerList.appendChild(li);
+    });
   }
+
 });
 
 socket.on("error", (message) => {
@@ -329,8 +349,8 @@ const darkZones = [
 ];
 
 function drawDarkZones(ctx) {
-  ctx.fillStyle = 'rgba(0, 0, 0, 0.5)'; // Semi-transparent black
-  darkZones.forEach(zone => {
+  ctx.fillStyle = "rgba(0, 0, 0, 0.5)"; // Semi-transparent black
+  darkZones.forEach((zone) => {
     ctx.fillRect(zone.x, zone.y, zone.width, zone.height);
   });
 }

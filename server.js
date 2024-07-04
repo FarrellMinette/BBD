@@ -11,7 +11,7 @@ const rooms = new Map();
 const MAX_PLAYERS = 4;
 let gryoscopeGlobalData = {};
 
-let resultant = {
+let prevRes = {
   gamma: 0,
   beta: 0,
 };
@@ -60,10 +60,10 @@ io.on("connection", (socket) => {
 
   socket.on("transmitMap", ({ map, roomCode }) => {
     const room = rooms.get(roomCode);
-    let column = Math.random()
-    let row = Math.random()
-    console.log(column, row)
-    io.to(roomCode).emit("receieveMap", { map, room, column, row});
+    let column = Math.random();
+    let row = Math.random();
+    console.log(column, row);
+    io.to(roomCode).emit("receieveMap", { map, room, column, row, roomCode });
   });
 
   socket.on("gyroscopeData", ({ roomCode, data }) => {
@@ -95,6 +95,8 @@ io.on("connection", (socket) => {
         data: res,
         host: room.host == socket.id,
       });
+
+      prevRes = res;
     }
   });
 

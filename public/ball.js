@@ -91,11 +91,27 @@ let balls = [];
 let ballElements = [];
 let holeElements = [];
 
-// Wall metadata
-let mapData, walls, holes, plus_two_holes, plus_four_holes, reverse_holes, skip_holes;
+socket_to_ball_name = {};
+socket_to_ball_id = {};
+let currRoom;
+let currID;
+let numTimesErrorPlayed = 0;
 
-socket.on("receieveMap", ({ map, room, column, row }) => {
+let winner;
+
+// Wall metadata
+let mapData,
+  walls,
+  holes,
+  plus_two_holes,
+  plus_four_holes,
+  reverse_holes,
+  skip_holes;
+
+socket.on("receieveMap", ({ map, room, column, row, roomCode }) => {
   mazeData = map;
+  currRoom = roomCode;
+  currID = socket.id;
 
   walls = mazeData.map((wall) => ({
     x: wall.column * (pathW + wallW),
@@ -132,11 +148,13 @@ socket.on("receieveMap", ({ map, room, column, row }) => {
     holeElements.push(ball);
   });
 
-  plus_two_holes = [{ column: Math.floor(column*numCols), row: Math.floor(row*numRows) }].map((hole) => ({
+  plus_two_holes = [
+    { column: Math.floor(column * numCols), row: Math.floor(row * numRows) },
+  ].map((hole) => ({
     x: hole.column * (wallW + pathW) + (wallW / 2 + pathW / 2),
     y: hole.row * (wallW + pathW) + (wallW / 2 + pathW / 2),
   }));
-  
+
   plus_two_holes.forEach(({ x, y }) => {
     const hole = document.createElement("div");
     hole.setAttribute("class", "plus-two-hole");
@@ -145,11 +163,13 @@ socket.on("receieveMap", ({ map, room, column, row }) => {
     holeElements.push(hole);
   });
 
-  plus_four_holes = [{ column: Math.floor(row*numRows), row: Math.floor(column*numCols) }].map((hole) => ({
+  plus_four_holes = [
+    { column: Math.floor(row * numRows), row: Math.floor(column * numCols) },
+  ].map((hole) => ({
     x: hole.column * (wallW + pathW) + (wallW / 2 + pathW / 2),
     y: hole.row * (wallW + pathW) + (wallW / 2 + pathW / 2),
   }));
-  
+
   plus_four_holes.forEach(({ x, y }) => {
     const hole = document.createElement("div");
     hole.setAttribute("class", "plus-four-hole");
@@ -158,11 +178,16 @@ socket.on("receieveMap", ({ map, room, column, row }) => {
     holeElements.push(hole);
   });
 
-  reverse_holes = [{ column: Math.floor(row*numRows/2), row: Math.floor(column*numCols/3) }].map((hole) => ({
+  reverse_holes = [
+    {
+      column: Math.floor((row * numRows) / 2),
+      row: Math.floor((column * numCols) / 3),
+    },
+  ].map((hole) => ({
     x: hole.column * (wallW + pathW) + (wallW / 2 + pathW / 2),
     y: hole.row * (wallW + pathW) + (wallW / 2 + pathW / 2),
   }));
-  
+
   reverse_holes.forEach(({ x, y }) => {
     const hole = document.createElement("div");
     hole.setAttribute("class", "reverse-hole");
@@ -171,19 +196,23 @@ socket.on("receieveMap", ({ map, room, column, row }) => {
     holeElements.push(hole);
   });
 
-  skip_holes = [{ column: Math.floor(row*numRows/3), row: Math.floor(column*numCols/2) }].map((hole) => ({
+  skip_holes = [
+    {
+      column: Math.floor((row * numRows) / 3),
+      row: Math.floor((column * numCols) / 2),
+    },
+  ].map((hole) => ({
     x: hole.column * (wallW + pathW) + (wallW / 2 + pathW / 2),
     y: hole.row * (wallW + pathW) + (wallW / 2 + pathW / 2),
   }));
-  
+
   skip_holes.forEach(({ x, y }) => {
     const hole = document.createElement("div");
     hole.setAttribute("class", "skip-hole");
     hole.style.cssText = `left: ${x}px; top: ${y}px;`;
     mazeElement.appendChild(hole);
-    holeElements.push(hole);  
+    holeElements.push(hole);
   });
-
 
   resetGame(room);
   balls.forEach(({ x, y }, index) => {
@@ -194,6 +223,11 @@ socket.on("receieveMap", ({ map, room, column, row }) => {
     ball.id = `ball-${id}`;
     mazeElement.appendChild(ball);
     ballElements.push(ball);
+
+    const name = room.players[index].name;
+
+    socket_to_ball_name[index] = name;
+    socket_to_ball_id[index] = id;
   });
 });
 
@@ -333,6 +367,7 @@ function main(timestamp) {
   const timeElapsed = (timestamp - previousTimestamp) / 16;
 
   try {
+    index = 0;
     // If mouse didn't move yet don't do anything
     if (accelerationX != undefined && accelerationY != undefined) {
       const velocityChangeX = accelerationX * timeElapsed;
@@ -570,9 +605,13 @@ function main(timestamp) {
           if (distance <= holeSize / 2) {
             // The ball fell into a hole
             holeElements[hi].style.backgroundColor = "green";
-            alert(`Game over - Won game`);
+            document.getElementById("game-start-title").textContent =
+              "Winner:" + socket_to_ball_name[index];
+
+            const id = socket_to_ball_id[index];
+            winner = id;
             gameInProgress = false;
-            resetGame();
+            throw Error("Game over");
           }
         });
 
@@ -581,7 +620,7 @@ function main(timestamp) {
             x: ball.nextX,
             y: ball.nextY,
           });
-  
+
           if (distance <= holeSize / 2) {
             ball.velocityX = slow(ball.velocityX, 0.25);
             ball.velocityY = slow(ball.velocityY, 0.25);
@@ -593,7 +632,7 @@ function main(timestamp) {
             x: ball.nextX,
             y: ball.nextY,
           });
-  
+
           if (distance <= holeSize / 2) {
             ball.velocityX = slow(ball.velocityX, 1);
             ball.velocityY = slow(ball.velocityY, 1);
@@ -605,11 +644,10 @@ function main(timestamp) {
             x: ball.nextX,
             y: ball.nextY,
           });
-  
-          if (distance <= holeSize / 2) {
-            ball.velocityX = -1.5*ball.velocityX
-            ball.velocityY = -1.5*ball.velocityY
 
+          if (distance <= holeSize / 2) {
+            ball.velocityX = -1.5 * ball.velocityX;
+            ball.velocityY = -1.5 * ball.velocityY;
           }
         });
 
@@ -618,27 +656,27 @@ function main(timestamp) {
             x: ball.nextX,
             y: ball.nextY,
           });
-  
+
           if (distance <= holeSize / 2) {
-            ball.velocityX = 0
-            ball.velocityY = 0
+            ball.velocityX = 0;
+            ball.velocityY = 0;
           }
         });
 
-        if (key === 'ArrowUp') {
+        if (key === "ArrowUp") {
           ball.velocityY = Math.max(ball.velocityY - 0.25, -maxVelocity);
-        } else if (key === 'ArrowDown') {
-            ball.velocityY = Math.min(ball.velocityY + 0.25, maxVelocity);
-        } else if (key === 'ArrowLeft') {
-            ball.velocityX = Math.max(ball.velocityX - 0.25, -maxVelocity);
-        } else if (key === 'ArrowRight') {
-            ball.velocityX = Math.min(ball.velocityX + 0.25, maxVelocity);
+        } else if (key === "ArrowDown") {
+          ball.velocityY = Math.min(ball.velocityY + 0.25, maxVelocity);
+        } else if (key === "ArrowLeft") {
+          ball.velocityX = Math.max(ball.velocityX - 0.25, -maxVelocity);
+        } else if (key === "ArrowRight") {
+          ball.velocityX = Math.min(ball.velocityX + 0.25, maxVelocity);
         }
-        
+
         // Adjust ball metadata
         ball.x = ball.x + ball.velocityX;
         ball.y = ball.y + ball.velocityY;
-      });    
+      });
 
       // Move balls to their new position on the UI
       balls.forEach(({ x, y }, index) => {
@@ -646,31 +684,42 @@ function main(timestamp) {
           index
         ].style.cssText = `left: ${x}px; top: ${y}px; background-color: ${colors[index]}`;
       });
-    }
 
-    // Win detection
-    if (
-      balls.every(
-        (ball) => distance2D(ball, { x: 350 / 2, y: 315 / 2 }) < 65 / 2
-      )
-    ) {
-      gameInProgress = false;
-    } else {
+      index++;
       previousTimestamp = timestamp;
       window.requestAnimationFrame(main);
-
-      window.addEventListener('keydown', (event) => {
-        key = event.key;
-    });
     }
   } catch (error) {
-    if (error.message == "The ball fell into a hole") {
-      noteElement.innerHTML = `A ball fell into a black hole!
-          <p>
-            Whomp whomp
-          </p>`;
-      noteElement.style.opacity = 1;
-      gameInProgress = false;
+    if (error.message == "Game over") {
+      if (winner !== currID && numTimesErrorPlayed == 0) {
+        var audio = new Audio("audio/downer_noise.mp3");
+        audio.play();
+        numTimesErrorPlayed += 1;
+
+        confetti({
+          particleCount: 100,
+          spread: 120,
+          origin: { y: 0.6, x: 0.2 },
+        });
+
+        confetti({
+          particleCount: 100,
+          spread: 120,
+          origin: { y: 0.4, x: 0.4 },
+        });
+
+        confetti({
+          particleCount: 100,
+          spread: 120,
+          origin: { y: 0.6, x: 0.7 },
+        });
+
+        confetti({
+          particleCount: 100,
+          spread: 120,
+          origin: { y: 0.9, x: 0.5 },
+        });
+      }
     } else throw error;
   }
 }

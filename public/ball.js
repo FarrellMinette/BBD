@@ -1,6 +1,6 @@
-let colors = ["red", "green", "blue", "yellow"];
-let softColors = ["#ff9b9b", "#6fc276", "#d1dff6", "#fff49b"];
-let key; 
+let colors = ["red", "green", "blue", "purple"];
+let softColors = ["#ff9b9b", "#6fc276", "#d1dff6", "#A66FB5"];
+let key;
 
 Math.minmax = (value, limit) => {
   return Math.max(Math.min(value, limit), -limit);
@@ -92,7 +92,13 @@ let ballElements = [];
 let holeElements = [];
 
 // Wall metadata
-let mapData, walls, holes, plus_two_holes, plus_four_holes, reverse_holes, skip_holes;
+let mapData,
+  walls,
+  holes,
+  plus_two_holes,
+  plus_four_holes,
+  reverse_holes,
+  skip_holes;
 
 socket.on("receieveMap", ({ map, room, column, row }) => {
   mazeData = map;
@@ -132,11 +138,13 @@ socket.on("receieveMap", ({ map, room, column, row }) => {
     holeElements.push(ball);
   });
 
-  plus_two_holes = [{ column: Math.floor(column*numCols), row: Math.floor(row*numRows) }].map((hole) => ({
+  plus_two_holes = [
+    { column: Math.floor(column * numCols), row: Math.floor(row * numRows) },
+  ].map((hole) => ({
     x: hole.column * (wallW + pathW) + (wallW / 2 + pathW / 2),
     y: hole.row * (wallW + pathW) + (wallW / 2 + pathW / 2),
   }));
-  
+
   plus_two_holes.forEach(({ x, y }) => {
     const hole = document.createElement("div");
     hole.setAttribute("class", "plus-two-hole");
@@ -145,11 +153,13 @@ socket.on("receieveMap", ({ map, room, column, row }) => {
     holeElements.push(hole);
   });
 
-  plus_four_holes = [{ column: Math.floor(row*numRows), row: Math.floor(column*numCols) }].map((hole) => ({
+  plus_four_holes = [
+    { column: Math.floor(row * numRows), row: Math.floor(column * numCols) },
+  ].map((hole) => ({
     x: hole.column * (wallW + pathW) + (wallW / 2 + pathW / 2),
     y: hole.row * (wallW + pathW) + (wallW / 2 + pathW / 2),
   }));
-  
+
   plus_four_holes.forEach(({ x, y }) => {
     const hole = document.createElement("div");
     hole.setAttribute("class", "plus-four-hole");
@@ -158,11 +168,16 @@ socket.on("receieveMap", ({ map, room, column, row }) => {
     holeElements.push(hole);
   });
 
-  reverse_holes = [{ column: Math.floor(row*numRows/2), row: Math.floor(column*numCols/3) }].map((hole) => ({
+  reverse_holes = [
+    {
+      column: Math.floor((row * numRows) / 2),
+      row: Math.floor((column * numCols) / 3),
+    },
+  ].map((hole) => ({
     x: hole.column * (wallW + pathW) + (wallW / 2 + pathW / 2),
     y: hole.row * (wallW + pathW) + (wallW / 2 + pathW / 2),
   }));
-  
+
   reverse_holes.forEach(({ x, y }) => {
     const hole = document.createElement("div");
     hole.setAttribute("class", "reverse-hole");
@@ -171,19 +186,23 @@ socket.on("receieveMap", ({ map, room, column, row }) => {
     holeElements.push(hole);
   });
 
-  skip_holes = [{ column: Math.floor(row*numRows/3), row: Math.floor(column*numCols/2) }].map((hole) => ({
+  skip_holes = [
+    {
+      column: Math.floor((row * numRows) / 3),
+      row: Math.floor((column * numCols) / 2),
+    },
+  ].map((hole) => ({
     x: hole.column * (wallW + pathW) + (wallW / 2 + pathW / 2),
     y: hole.row * (wallW + pathW) + (wallW / 2 + pathW / 2),
   }));
-  
+
   skip_holes.forEach(({ x, y }) => {
     const hole = document.createElement("div");
     hole.setAttribute("class", "skip-hole");
     hole.style.cssText = `left: ${x}px; top: ${y}px;`;
     mazeElement.appendChild(hole);
-    holeElements.push(hole);  
+    holeElements.push(hole);
   });
-
 
   resetGame(room);
   balls.forEach(({ x, y }, index) => {
@@ -581,7 +600,7 @@ function main(timestamp) {
             x: ball.nextX,
             y: ball.nextY,
           });
-  
+
           if (distance <= holeSize / 2) {
             ball.velocityX = slow(ball.velocityX, 0.25);
             ball.velocityY = slow(ball.velocityY, 0.25);
@@ -593,7 +612,7 @@ function main(timestamp) {
             x: ball.nextX,
             y: ball.nextY,
           });
-  
+
           if (distance <= holeSize / 2) {
             ball.velocityX = slow(ball.velocityX, 1);
             ball.velocityY = slow(ball.velocityY, 1);
@@ -605,11 +624,10 @@ function main(timestamp) {
             x: ball.nextX,
             y: ball.nextY,
           });
-  
-          if (distance <= holeSize / 2) {
-            ball.velocityX = -1.5*ball.velocityX
-            ball.velocityY = -1.5*ball.velocityY
 
+          if (distance <= holeSize / 2) {
+            ball.velocityX = -1.5 * ball.velocityX;
+            ball.velocityY = -1.5 * ball.velocityY;
           }
         });
 
@@ -618,27 +636,27 @@ function main(timestamp) {
             x: ball.nextX,
             y: ball.nextY,
           });
-  
+
           if (distance <= holeSize / 2) {
-            ball.velocityX = 0
-            ball.velocityY = 0
+            ball.velocityX = 0;
+            ball.velocityY = 0;
           }
         });
 
-        if (key === 'ArrowUp') {
+        if (key === "ArrowUp") {
           ball.velocityY = Math.max(ball.velocityY - 0.25, -maxVelocity);
-        } else if (key === 'ArrowDown') {
-            ball.velocityY = Math.min(ball.velocityY + 0.25, maxVelocity);
-        } else if (key === 'ArrowLeft') {
-            ball.velocityX = Math.max(ball.velocityX - 0.25, -maxVelocity);
-        } else if (key === 'ArrowRight') {
-            ball.velocityX = Math.min(ball.velocityX + 0.25, maxVelocity);
+        } else if (key === "ArrowDown") {
+          ball.velocityY = Math.min(ball.velocityY + 0.25, maxVelocity);
+        } else if (key === "ArrowLeft") {
+          ball.velocityX = Math.max(ball.velocityX - 0.25, -maxVelocity);
+        } else if (key === "ArrowRight") {
+          ball.velocityX = Math.min(ball.velocityX + 0.25, maxVelocity);
         }
-        
+
         // Adjust ball metadata
         ball.x = ball.x + ball.velocityX;
         ball.y = ball.y + ball.velocityY;
-      });    
+      });
 
       // Move balls to their new position on the UI
       balls.forEach(({ x, y }, index) => {
@@ -659,9 +677,9 @@ function main(timestamp) {
       previousTimestamp = timestamp;
       window.requestAnimationFrame(main);
 
-      window.addEventListener('keydown', (event) => {
+      window.addEventListener("keydown", (event) => {
         key = event.key;
-    });
+      });
     }
   } catch (error) {
     if (error.message == "The ball fell into a hole") {

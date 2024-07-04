@@ -120,3 +120,33 @@ button {
         transform: translateY(0);
     }
 }
+
+/* Base styles for the image */
+.responsive-image {
+    width: 100%;
+    height: auto; /* Maintain aspect ratio */
+    max-width: 100%;
+}
+
+/* Additional styles for different screen sizes using media queries */
+
+/* Styles for small devices (phones) */
+@media (max-width: 600px) {
+    .responsive-image {
+        width: 100%; /* Ensure the image fits within the screen */
+    }
+}
+
+/* Styles for medium devices (tablets) */
+@media (min-width: 601px) and (max-width: 1024px) {
+    .responsive-image {
+        width: 100%; /* Adjust as necessary */
+    }
+}
+
+/* Styles for large devices (laptops/desktops) */
+@media (min-width: 1025px) {
+    .responsive-image {
+        width: 100%; /* Adjust as necessary */
+    }
+}
